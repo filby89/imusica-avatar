@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Kinect &amp; HTML5</title>
+        <link rel="stylesheet" type="text/css" href="bootstrap4/css/bootstrap.css" />
+    </head>
+    <body>
+    <!-- Just an image -->
+<nav class="navbar navbar-light bg-primary text-white">
+  <a class="navbar-brand text-white" href="#">
+    <!-- <img src="/assets/brand/bootstrap-solid.svg" width="30" height="30" alt=""> -->
+    IMusica
+  </a>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-12 col-md-9">
+	  	<h5>3D Kinect Avatar and Gesture Recognition</h5>
+		<div id="world" width="960" height="540"></div>
+    </div>
+    <div class="col-3">
+      <div class="card" style="width: 18rem;">
+	  <div class="card-body">
+	    <h5 class="card-title">Details</h5>
+			<h6> <label id="status">None</label> </h6>
+
+			<table class="table">
+			  <tbody>
+				<tr><td>RH x position:</td> <td id="HR_x"></td> </tr>
+				<tr><td>RH y position:</td> <td id="HR_y"></td> </tr> <br>
+				<tr><td>RH z position:</td> <td id="HR_z"></td> </tr> <br>
+				<tr><td>LH x position:</td> <td id="HL_x"></td> </tr>
+				<tr><td>LH y position:</td> <td id="HL_y"></td> </tr> <br>
+				<tr><td>LH z position:</td> <td id="HL_z"></td> </tr> <br>
+				<tr><td>bendQuanto:</td> 	<td id="bendQuanto"></td> </tr> <br>
+				<tr><td>GestureDirection:</td> <td id="GestureDirection"></td> </tr> <br>
+				<tr><td>LeftY:</td> <td id="LeftY"></td> </tr> 
+				<tr><td>RightX:</td> <td id="RightX"></td> </tr> 
+				<tr><td>RightXVel:</td> <td id="RightXVel"></td> </tr> 
+			  </tbody>
+			</table>
+        <button type="button" id="stop-button"  class="btn btn-danger">Disconnect</button>
+	  </div>
+	</div>
+    </div>
+  </div>
+</div>
+		
+
+		<style>
+		#world {
+			min-height: 540px;
+		}
+		</style>
+				
+
+
+		<script src="chat.js"></script>
+		<script src="three.js"></script>
+		<script src="OrbitControls.js"></script>
+		<script type="text/javascript" src="kinectAvatar.js"></script>
+		<script type="text/javascript" src="world.js"></script>
+		<script>
+		 var world = new interactionWorld(document.getElementById("world"));
+		 world.init();
+		 var avatar = new kinectAvatar(world);
+		 // var avatar2 = new kinectAvatar(world);
+		 // var avatar3 = new kinectAvatar(world);
+		 // var avatar4 = new kinectAvatar(world);
+		 // var avatar5 = new kinectAvatar(world);
+		 // var avatar6 = new kinectAvatar(world);
+		 
+
+/**
+* Executed when the page has finished loading.
+*/
+window.onload = function () {
+
+
+  	var buttonStop = document.getElementById("stop-button");	
+    var label = document.getElementById("status-label");
+	var status = document.getElementById("status");
+
+
+	if (!window.WebSocket) {
+        status.innerHTML = "Your browser does not support web sockets!";
+        status.classList.add("text-danger");
+        return;
+    }
+
+    status.innerHTML = "Connecting to server...";
+	
+    // Connect to the WebSocket server!
+    var socket = new WebSocket("wss://localhost:8182");
+
+    /**
+    * WebSocket onopen event.
+    */
+    // Connection established.
+    socket.onopen = function () {
+		//socket.send("get-gestures") ;
+        status.innerHTML = "Connection successful.";
+        status.classList.add("text-success");
+		console.log("Connection successful.");
+    };
+	
+    /**
+    * WebSocket onmessage event.
+    */
+
+    socket.onmessage = function (event) {				
+        if (typeof event.data === "string") {
+			// Create a JSON object.
+            var jsonObject = JSON.parse(event.data);
+console.log(jsonObject)
+            if (jsonObject.skeletons) {
+	            avatar.refresh(jsonObject.skeletons[0]);
+	             for (var i = 0; i < jsonObject.skeletons.length; i++) {	
+						for (var j = 0; j < jsonObject.skeletons[i].joints.length; j++) {
+						var joint = jsonObject.skeletons[i].joints[j];
+							
+						if (joint.name == "HandRight") {
+							var HL_x = joint.Xw;
+							document.getElementById("HR_x").innerHTML = HL_x.toPrecision(4);
+							var HL_y = joint.Yw;
+							document.getElementById("HR_y").innerHTML = HL_y.toPrecision(4);
+							var HL_z = joint.Zw;
+							document.getElementById("HR_z").innerHTML = HL_z.toPrecision(4);
+						}
+						else if (joint.name == "HandLeft") {
+							var HL_x = joint.Xw;
+							document.getElementById("HL_x").innerHTML = HL_x.toPrecision(4);
+							var HL_y = joint.Yw;
+							document.getElementById("HL_y").innerHTML = HL_y.toPrecision(4);
+							var HL_z = joint.Zw;
+							document.getElementById("HL_z").innerHTML = HL_z.toPrecision(4);
+
+						}										
+	                }
+	            }
+
+	        }    
+	        else {
+				var RightX = jsonObject.RightX;
+				var LeftY = jsonObject.LeftY;
+				var GestureDirection = jsonObject.GestureDirection;			
+				var RightXVel = jsonObject.RightXVel;
+				if (RightX!= null) {
+					document.getElementById("RightX").innerHTML = RightX.toPrecision(4);
+					document.getElementById("LeftY").innerHTML = LeftY.toPrecision(4);
+					document.getElementById("GestureDirection").innerHTML = GestureDirection;
+					document.getElementById("RightXVel").innerHTML = RightXVel.toPrecision(4);
+				}
+
+
+				var pentatonic = [0, 2, 4, 7, 9, 12];
+				var bendQuanto = Math.floor((1 - LeftY)*(pentatonic.length - 1));
+				console.log(" position bef= "+ LeftY + "; after= " + bendQuanto);
+				if (bendQuanto < 0 || bendQuanto > 5){
+					bendQuanto = 0;
+				}
+				document.getElementById("bendQuanto").innerHTML = bendQuanto;				
+				 //Display the skeleton joints.
+	            }
+	            avatar.refreshHands(bendQuanto);
+
+        }
+    }
+
+    /**
+    * WebSocket onclose event.
+    */
+	// Connection closed.
+    socket.onclose = function (event) {
+		console.log("Connection closed.");
+		
+        var code = event.code;
+        var reason = event.reason;
+        var wasClean = event.wasClean;		
+		
+        if (wasClean) {
+            status.innerHTML = "Connection closed normally.";
+        }
+        else {
+            status.innerHTML = "Connection closed with message: " + reason + " (Code: " + code + ")";
+        }
+    }
+    /**
+    * WebSocket onerror event.
+    */
+    socket.onerror = function (event) {
+        status.innerHTML = "Error: " + event;
+    }
+	/**
+    * Disconnect and close the connection.
+    */
+    buttonStop.onclick = function (event) {
+        if (socket.readyState == WebSocket.OPEN) {
+            socket.close();
+        }
+    }
+	
+}
+		</script>
+
+    </body>
+</html>
+
+
+

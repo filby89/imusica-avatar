@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+	
+</head>
+
+
+<body>
+<meta charset="utf-8">
+
+	<button type="button" onclick="up()">up</button>
+	<button type="button" onclick="down()">down</button>
+
+	<script src="/modalys/public/jquery-3.2.1.min.js"></script>
+	<script src="/modalys/public/lodash.min.js"></script>
+	<script src="/modalys/public/postal.min.js"></script>
+	<!-- <script src="/modalys/public/audioManager.js"></script>
+	<script>
+		var audioManagerObject  = new AudioManager();
+ 	</script> -->
+	<script src="/modalys/public/modalys.js"></script>
+	<!-- <script src="/modalys/public/modalys-post.js"></script> -->
+
+	<script type="text/javascript">
+		var connection = new WebSocket('ws://localhost:8182');
+		var pentatonic = [0, 2, 4, 7, 9, 12];
+		connection.onopen = function () {
+			connection.send("get-gestures");
+			console.log("Connection Opened!");
+		};
+
+		// Log errors
+		connection.onerror = function (error) {
+			console.error('WebSocket Error ' + error);
+		};
+
+		// Log messages from the server
+		connection.onmessage = function (e) {
+			var datagest = JSON.parse(e.data);
+			// console.log('Gestures Arrived! Hoorey!', datagest);
+			
+			var right_hand_position = datagest.RightX;
+			var data = {};
+			data["position1"] = 13.0*right_hand_position;
+			modalysChannel.publish("updateParameter", data);
+			var left_hand_position = datagest.LeftY;
+
+			var bendQuanto = Math.floor((1 - left_hand_position)*(pentatonic.length - 1));
+			if (bendQuanto < 0 || bendQuanto > 5){
+				bendQuanto = 0;
+			}
+			Modalys.handleObjectMessage("string1", "pitchbend", 1200*pentatonic[bendQuanto]/12.0, 0);
+			// console.log("right_hand_position - left_hand_position:", 13.0*right_hand_position, bendQuanto);
+		};
+
+
+		console.log("Modalys: ", Modalys);
+		var modalysChannel = postal.channel("modalys");
+		console.log("modalysChannel: ", modalysChannel);
+		modalysChannel.publish("play", {
+			"test" : "test"
+		});
+
+		// var data = {};
+		// data["position1"] = [0.5, 0.1];
+		// modalysChannel.publish("updateParameterScheduled", data);
+
+		function up(){
+			var data = {};
+			// data["position1"] = [0.5, 0.1];
+			// modalysChannel.publish("updateParameterScheduled", data);
+			data["position1"] = 0.8;
+			modalysChannel.publish("updateParameter", data);
+			Modalys.handleObjectMessage("string1", "pitchbend", 120*Math.random(), 0);
+		}
+		function down(){
+			var data = {};
+			// data["position1"] = [-0.5, 0.1];
+			// modalysChannel.publish("updateParameterScheduled", data);
+			data["position1"] = -0.8;
+			modalysChannel.publish("updateParameter", data);
+			Modalys.handleObjectMessage("string1", "pitchbend", 120*Math.random(), 0);
+		}
+
+	</script>
+		
+
+
+
+
+
+</body>
+</html>

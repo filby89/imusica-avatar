@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Kinect &amp; HTML5</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+        <script type="text/javascript" src="chat.js"></script>
+    </head>
+    <body>
+        <header>
+		<h1/>
+            <h2>Kinect Skeleton and Gestures Stream<br>
+			Status: <label id="status">None</label>
+			</h2>
+			
+			<h1/>
+        </header>
+		
+
+		<canvas id="canvas" width="960" height="540"></canvas>
+		
+		<h2>
+		<table>
+		<tr><td>RH x position:</td> <td id="HR_x"></td> </tr>
+		<tr><td>RH y position:</td> <td id="HR_y"></td> </tr> <br>
+		<tr><td>LH x position:</td> <td id="HL_x"></td> </tr>
+		<tr><td>LH y position:</td> <td id="HL_y"></td> </tr> <br>
+		<tr><td>bendQuanto:</td> 	<td id="bendQuanto"></td> </tr> <br>
+		<tr><td>GestureDirection:</td> <td id="GestureDirection"></td> </tr> <br>
+		<tr><td>RightXVel:</td> <td id="RightXVel"></td> </tr> <br>
+		
+		</table></h2>
+		
+		
+        <article>
+		<input type="button" id="stop-button" value="disconnect" />
+		<!-- <label for="">RH x position: </label><input type="textbox" name="RH_pos" /> -->
+			<!--<input type="button" id="body-button" value="Get bodies" /> 
+			<input type="button" id="gestures-button" value="Get gestures" />
+			<input type="button" id="color-button" value="get live image" /> 
+            <label id="status-label">status...</label>
+			<input type="text" id="name-view" placeholder="your name" />
+            <input type="text" id="text-view" placeholder="type your message..." />
+            <input type="button" id="send-button" value="send!" />  -->
+            <!--<div class="clear"></div> -->
+            <!--<div id="chat-area"></div> -->
+            <!--<input type="button" id="video-button" value="get video" /> 
+            <img id="video" src="" alt="video streaming from server" />-->
+        </article>
+        <footer></footer>
+    </body>
+</html>
+
+
+

@@ -1,0 +1,11 @@
+{
+  "name": "server",
+  "description": "Basic Node.js server",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "child_process": "^1.0.2",
+    "express": "^4.15.3",
+    "path": "^0.12.7"
+  }
+}

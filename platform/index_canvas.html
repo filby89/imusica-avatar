@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Kinect &amp; HTML5</title>
+        <link rel="stylesheet" type="text/css" href="bootstrap4/css/bootstrap.css" />
+    </head>
+    <body>
+    <!-- Just an image -->
+<nav class="navbar navbar-light bg-primary text-white">
+  <a class="navbar-brand text-white" href="#">
+    <!-- <img src="/assets/brand/bootstrap-solid.svg" width="30" height="30" alt=""> -->
+    IMusica
+  </a>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-12 col-md-9">
+	  	<h5>Kinect Skeleton and Gestures Stream</h5>
+		<canvas id="canvas" width="960" height="540"></canvas>
+    </div>
+    <div class="col-3">
+      <div class="card" style="width: 18rem;">
+	  <div class="card-body">
+	    <h5 class="card-title">Details</h5>
+			<h6> <label id="status">None</label> </h6>
+
+			<table class="table">
+			  <tbody>
+				<tr><td>RH x position:</td> <td id="HR_x"></td> </tr>
+				<tr><td>RH y position:</td> <td id="HR_y"></td> </tr> <br>
+				<tr><td>LH x position:</td> <td id="HL_x"></td> </tr>
+				<tr><td>LH y position:</td> <td id="HL_y"></td> </tr> <br>
+				<tr><td>bendQuanto:</td> 	<td id="bendQuanto"></td> </tr> <br>
+				<tr><td>GestureDirection:</td> <td id="GestureDirection"></td> </tr> <br>
+				<tr><td>RightXVel:</td> <td id="RightXVel"></td> </tr> 
+			  </tbody>
+			</table>
+        <button type="button" id="stop-button"  class="btn btn-danger">Disconnect</button>
+	  </div>
+	</div>
+    </div>
+  </div>
+</div>
+		
+
+		
+				
+
+
+		<script src="body_helpers.js"></script>
+		<script type="text/javascript" src="chat.js"></script>
+
+
+    </body>
+</html>

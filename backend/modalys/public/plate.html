@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Modalys plate with felt mallet</title>
+  <script src="jquery-3.2.1.min.js"></script>
+  <script src="modalys.js"></script>
+  <script>
+    $("document").ready(function() {
+    var canvas = document.getElementById('plateSurface');
+    var context = canvas.getContext('2d');
+	
+	var impactPos=[];
+	
+    function writeMessage(canvas, message) {
+		var context = canvas.getContext('2d');
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		context.font = '10pt Calibri';
+		context.fillStyle = 'black';
+		context.fillText(message, 10, 25);
+    }
+	
+    function handleMouseDown(canvas, evt) {
+  	  	var rect = canvas.getBoundingClientRect();
+		var X = evt.clientX - rect.left;
+		var Y = evt.clientY - rect.top;
+		var data = new Float32Array(2);
+		impactPos[0] = X;
+		impactPos[1] = Y;
+		data[0] = X/canvas.width;
+		data[1] = Y/canvas.height;
+		
+		var nDataBytes = data.length * data.BYTES_PER_ELEMENT;
+		var dataPtr = Module._malloc(nDataBytes);
+		var dataHeap = new Uint8Array(Module.HEAPU8.buffer, dataPtr, nDataBytes);
+		dataHeap.set(new Uint8Array(data.buffer));
+        Modalys.changeParameterVectorValueScheduled("impactCoords1", dataHeap.byteOffset, 2, 0.01);
+		Module._free(dataHeap.byteOffset);
+    }
+
+    canvas.addEventListener('mousedown', function(evt) {
+      handleMouseDown(canvas, evt);
+    }, false);
+		
+      var partsNum = 1;
+      var pluckIsUp = [];
+
+      for (var i = 1; i <= partsNum; i++) {
+		var newdiv = $( '<div><h3>Plate '+i+'</h3><p>Mallet position (0 is at the plate): <input id="malletPosition'+i+'" type="range" orient="vertical" value="0.25" min="-0.05" max="0.5" step="0.005"/><span id="malletPositionValue'+i+'" style="font-size:9px;"/></div>' );
+		$("body").append(newdiv);
+        pluckIsUp[i] = true;
+
+        let idx = Number(i);
+
+        $("#malletPosition" + i).on("input", function() {
+			$("#malletPositionValue" + idx)[0].innerHTML=$(this).val()+' m.';
+          Modalys.changeParameterValueScheduled("malletPosition" + idx, $(this).val(), 0.01);
+        });
+      }
+
+      $.get("instr/plate.mlys")
+        .done(function(script) {
+          var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          Modalys.setSampleRate(audioContext.sampleRate);
+
+		  //document.getElementById('debug').innerHTML=script;
+          var finalScript = "new()\nset_precision('FLOAT')\nset_message_level(3)\n";
+          for (var i = 1; i <= partsNum; i++) {
+             var tmp = script.replace(/\$/g, i);
+             finalScript += tmp;
+          }
+          Modalys.loadScriptFromString(finalScript);
+	
+          var modalysNode = audioContext.createScriptProcessor(512, 1, 1);
+          modalysNode.onaudioprocess = function(audioEvent) {
+            Modalys.processAudio(audioEvent.outputBuffer)
+          }
+		
+  		var analyser = audioContext.createAnalyser();
+  		analyser.fftSize = 2048;
+  		var bufferLength = analyser.frequencyBinCount;
+  		var dataArray = new Uint8Array(bufferLength);
+  		analyser.getByteTimeDomainData(dataArray);
+  		var analyzerCanvas = document.getElementById("plateSurface");
+  		var analyzerCanvasCtx = analyzerCanvas.getContext("2d");
+		analyzerCanvasCtx.clearRect(0, 0, analyzerCanvas.width, analyzerCanvas.height);
+
+  		// draw an oscilloscope of the current audio source
+
+  		function draw() {
+			drawVisual = requestAnimationFrame(draw);
+			analyser.getByteTimeDomainData(dataArray);
+			analyzerCanvasCtx.fillStyle = 'rgb(0, 30, 0)';
+			analyzerCanvasCtx.fillRect(0, 0, analyzerCanvas.width, analyzerCanvas.height);
+			analyzerCanvasCtx.lineWidth = 1;
+			analyzerCanvasCtx.strokeStyle = 'rgb(200, 200, 200)';
+			analyzerCanvasCtx.beginPath();
+			var sliceWidth = analyzerCanvas.width * 1.0 / bufferLength;
+			var x = 0;
+			for (var i = 0; i < bufferLength; i++) {
+				var v = dataArray[i] / 128.0;
+				var y = v * analyzerCanvas.height / 2;
+				if (i === 0) {
+				  analyzerCanvasCtx.moveTo(x, y);
+				} else {
+				  analyzerCanvasCtx.lineTo(x, y);
+				}
+				x += sliceWidth;
+			}
+
+			analyzerCanvasCtx.lineTo(canvas.width, canvas.height / 2);
+			analyzerCanvasCtx.stroke();
+
+			var radius = 10;
+			analyzerCanvasCtx.beginPath();
+			analyzerCanvasCtx.arc(impactPos[0], impactPos[1], radius, 0, 2 * Math.PI, false);
+			analyzerCanvasCtx.fillStyle = 'green';
+			analyzerCanvasCtx.fill();
+			analyzerCanvasCtx.lineWidth = 2;
+			analyzerCanvasCtx.strokeStyle = '#007700';
+			analyzerCanvasCtx.stroke();
+  		};
+
+          modalysNode.connect(audioContext.destination);
+		  modalysNode.connect(analyser);
+    	  draw();
+        });
+      /*
+      $(document).keydown(function(e) {
+          switch (e.which) {
+            case 70: // f
+              pluckIsUp[1] ? pluckDown(1) : pluckUp(1);
+              break;
+            case 67: // c
+              pluckIsUp[2] ? pluckDown(2) : pluckUp(2);
+              break;
+            case 71: // g
+              pluckIsUp[3] ? pluckDown(3) : pluckUp(3);
+              break;
+            case 68: // d
+              pluckIsUp[4] ? pluckDown(4) : pluckUp(4);
+              break;
+            default: return;
+          }
+          e.preventDefault();
+      });
+	*/
+    });
+  </script>
+</head>
+
+<body>
+  <canvas id="plateSurface" width="200" height="200" style="border:1px solid #000000;"/>
+  <div id="debug"></div>
+</body>
+</html>
