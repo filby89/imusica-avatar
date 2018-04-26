@@ -62,16 +62,86 @@
 		<script src="OrbitControls.js"></script>
 		<script type="text/javascript" src="kinectAvatar.js"></script>
 		<script type="text/javascript" src="world.js"></script>
+		<script type="text/javascript" src="Tone.js"></script>
 		<script>
+		////// IMPORTANT PART ////////
 		 var world = new interactionWorld(document.getElementById("world"));
 		 world.init();
-		 var avatar = new kinectAvatar(world);
-		 // var avatar2 = new kinectAvatar(world);
-		 // var avatar3 = new kinectAvatar(world);
-		 // var avatar4 = new kinectAvatar(world);
-		 // var avatar5 = new kinectAvatar(world);
-		 // var avatar6 = new kinectAvatar(world);
-		 
+		 var avatar = new kinectAvatar(world,1,false);
+		 avatar.addToScene(world.scene);
+
+function make_Instrument() {
+// create synth
+var instrument = new Tone.FMSynth();
+var synthJSON = {
+    "harmonicity": 3.01,
+    "modulationIndex": 14,
+    "oscillator": {
+        "type": "triangle"
+    },
+    "envelope": {
+        "attack": 0.2,
+        "decay": 0.3,
+        "sustain": 0.1,
+        "release": 1.2
+    },
+    "modulation" : {
+        "type": "square"
+    },
+    "modulationEnvelope" : {
+        "attack": 0.01,
+        "decay": 0.5,
+        "sustain": 0.2,
+        "release": 0.1
+    }
+};
+
+instrument.set(synthJSON);
+
+var effect1, effect2, effect3;
+
+// create effects
+var effect1 = new Tone.Vibrato();
+effect1JSON = {
+	"frequency": 2.3,
+	"depth": 0.4,
+	"type": "triangle",
+    "wet": 0.5
+};
+effect1.set(effect1JSON);
+
+
+// make connections
+instrument.connect(effect1);
+effect1.connect(Tone.Master);
+
+// define deep dispose function
+function deep_dispose() {
+    if(effect1 != undefined && effect1 != null) {
+        effect1.dispose();
+        effect1 = null;
+    }
+    if(effect2 != undefined && effect2 != null) {
+        effect2.dispose();
+        effect2 = null;
+    }
+    if(effect3 != undefined && effect3 != null) {
+        effect3.dispose();
+        effect3 = null;
+    }
+    if(instrument != undefined && instrument != null) {
+        instrument.dispose();
+        instrument = null;
+    }
+}
+
+
+return {
+    instrument: instrument,
+    deep_dispose: deep_dispose
+    };
+
+}
 
 /**
 * Executed when the page has finished loading.
@@ -83,6 +153,8 @@ window.onload = function () {
     var label = document.getElementById("status-label");
 	var status = document.getElementById("status");
 
+	var synth = make_Instrument()['instrument'];
+
 
 	if (!window.WebSocket) {
         status.innerHTML = "Your browser does not support web sockets!";
@@ -93,7 +165,7 @@ window.onload = function () {
     status.innerHTML = "Connecting to server...";
 	
     // Connect to the WebSocket server!
-    var socket = new WebSocket("wss://localhost:8182");
+    var socket = new WebSocket("ws://localhost:8181");
 
     /**
     * WebSocket onopen event.
@@ -109,12 +181,13 @@ window.onload = function () {
     /**
     * WebSocket onmessage event.
     */
+    var previousTime = Date.now();
 
     socket.onmessage = function (event) {				
         if (typeof event.data === "string") {
 			// Create a JSON object.
             var jsonObject = JSON.parse(event.data);
-console.log(jsonObject)
+// console.log(jsonObject)
             if (jsonObject.skeletons) {
 	            avatar.refresh(jsonObject.skeletons[0]);
 	             for (var i = 0; i < jsonObject.skeletons.length; i++) {	
@@ -122,19 +195,19 @@ console.log(jsonObject)
 						var joint = jsonObject.skeletons[i].joints[j];
 							
 						if (joint.name == "HandRight") {
-							var HL_x = joint.Xw;
+							var HL_x = joint.x;
 							document.getElementById("HR_x").innerHTML = HL_x.toPrecision(4);
-							var HL_y = joint.Yw;
+							var HL_y = joint.y;
 							document.getElementById("HR_y").innerHTML = HL_y.toPrecision(4);
-							var HL_z = joint.Zw;
+							var HL_z = joint.z;
 							document.getElementById("HR_z").innerHTML = HL_z.toPrecision(4);
 						}
 						else if (joint.name == "HandLeft") {
-							var HL_x = joint.Xw;
+							var HL_x = joint.x;
 							document.getElementById("HL_x").innerHTML = HL_x.toPrecision(4);
-							var HL_y = joint.Yw;
+							var HL_y = joint.y;
 							document.getElementById("HL_y").innerHTML = HL_y.toPrecision(4);
-							var HL_z = joint.Zw;
+							var HL_z = joint.z;
 							document.getElementById("HL_z").innerHTML = HL_z.toPrecision(4);
 
 						}										
@@ -143,6 +216,7 @@ console.log(jsonObject)
 
 	        }    
 	        else {
+	        	console.log(jsonObject);
 				var RightX = jsonObject.RightX;
 				var LeftY = jsonObject.LeftY;
 				var GestureDirection = jsonObject.GestureDirection;			
@@ -157,15 +231,51 @@ console.log(jsonObject)
 
 				var pentatonic = [0, 2, 4, 7, 9, 12];
 				var bendQuanto = Math.floor((1 - LeftY)*(pentatonic.length - 1));
-				console.log(" position bef= "+ LeftY + "; after= " + bendQuanto);
+				// console.log(" position bef= "+ LeftY + "; after= " + bendQuanto);
 				if (bendQuanto < 0 || bendQuanto > 5){
 					bendQuanto = 0;
 				}
+				
+				if (Date.now() - previousTime < 200 ) {
+					return;
+				}
+				else {
+					previousTime = Date.now();
+				}
+
+				if (bendQuanto == 1) {
+					// play bendquanto note
+					var audio = new Audio('smokea.wav');
+				audio.play();
+					//play a middle 'C' for the duration of an 8th note
+					// synth.triggerAttackRelease("C4", Tone.Time(21).quantize(2));
+				}
+				else if (bendQuanto == 2) {
+					var audio = new Audio('smokeb.wav');
+				audio.play();
+					// synth.triggerAttackRelease("E4", Tone.Time(21).quantize(2));
+				}
+				else if (bendQuanto == 3) {
+					var audio = new Audio('smokec.wav');
+				audio.play();
+					// synth.triggerAttackRelease("G4", Tone.Time(21).quantize(2));
+				}
+				else if (bendQuanto == 4) {
+					var audio = new Audio('smoked.wav');
+				audio.play();
+					// synth.triggerAttackRelease("B4", Tone.Time(21).quantize(2));
+				}
+				else if (bendQuanto == 5) {
+					// synth.triggerAttackRelease("F", Tone.Time(21).quantize(2));
+				}
+
+
+
+
 				document.getElementById("bendQuanto").innerHTML = bendQuanto;				
 				 //Display the skeleton joints.
 	            }
 	            avatar.refreshHands(bendQuanto);
-
         }
     }
 

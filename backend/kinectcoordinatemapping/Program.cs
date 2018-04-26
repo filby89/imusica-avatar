@@ -46,6 +46,10 @@ namespace KinectCoordinateMapping
 
         [DataMember(Name = "OpenGest")]
         public bool OpenGest { get; set; }
+
+        [DataMember(Name = "Type")]
+        public string type { get; set; }
+
     }
 
     //public partial class MainWindow : Window
@@ -125,7 +129,7 @@ namespace KinectCoordinateMapping
         {
             WebSocketServer server = new WebSocketServer("ws://0.0.0.0:8181");
             WebSocketServer secure_server = new WebSocketServer("wss://0.0.0.0:8182");
-            secure_server.Certificate = new X509Certificate2("C:\\Users\\kinect_user\\Desktop\\imusica\\backend\\kinectcoordinatemapping\\509.pfx", "asdf");
+            secure_server.Certificate = new X509Certificate2("509.pfx", "asdf");
             server.Start(socket =>
             {
                 socket.OnOpen = () =>
@@ -521,7 +525,8 @@ namespace KinectCoordinateMapping
                                                     RightXVel = rightVel,
                                                     LeftY = lefthandpos,
                                                     GestureDirection = "down",
-                                                    OpenGest = detectedGestureOpen
+                                                    OpenGest = detectedGestureOpen,
+                                                    type = "gesture"
                                                 };
                                                 messageCount += 1;
                                                 //Console.WriteLine(messageCount + " LeftY-3: " + gestureData.LeftY);
@@ -550,7 +555,8 @@ namespace KinectCoordinateMapping
                                                     RightXVel = rightVel,
                                                     LeftY = lefthandpos,
                                                     GestureDirection = "up",
-                                                    OpenGest = detectedGestureOpen
+                                                    OpenGest = detectedGestureOpen,
+                                                    type="gesture"
                                                 };
                                                 messageCount += 1;
                                                 //Console.WriteLine(messageCount + " LeftY-4: " + gestureData.LeftY);
@@ -612,7 +618,7 @@ namespace KinectCoordinateMapping
                 serializer.WriteObject(ms, gestureDataIN);
 
                 string json = Encoding.Default.GetString(ms.ToArray());
-                Console.WriteLine("JSON FRAME: " + json);
+                //Console.WriteLine("JSON FRAME: " + json);
                 client.Send(json);
             }
         }
@@ -622,7 +628,7 @@ namespace KinectCoordinateMapping
         private static void Reader_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
         {
             var reference = e.FrameReference.AcquireFrame();
-             Console.WriteLine("frame arrived");
+//             Console.WriteLine("frame arrived");
             // Color
             using (var frame = reference.ColorFrameReference.AcquireFrame())
             {
@@ -988,7 +994,8 @@ namespace KinectCoordinateMapping
                                                     RightXVel = rightVel,
                                                     LeftY = lefthandpos,
                                                     GestureDirection = "down",
-                                                    OpenGest = detectedGestureOpen
+                                                    OpenGest = detectedGestureOpen,
+                                                    type="gesture"
                                                 };
                                                 messageCount += 1;
                                                 //Console.WriteLine(messageCount + " LeftY-3: " + gestureData.LeftY);
@@ -1017,7 +1024,8 @@ namespace KinectCoordinateMapping
                                                     RightXVel = rightVel,
                                                     LeftY = lefthandpos,
                                                     GestureDirection = "up",
-                                                    OpenGest = detectedGestureOpen
+                                                    OpenGest = detectedGestureOpen,
+                                                    type="gesture"
                                                 };
                                                 messageCount += 1;
                                                 //Console.WriteLine(messageCount + " LeftY-4: " + gestureData.LeftY);

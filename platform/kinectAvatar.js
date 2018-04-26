@@ -1,6 +1,13 @@
 class kinectAvatar{
 
-	constructor(world){
+	constructor(world, scale, mirror){
+		this.scale = scale;
+		if (mirror == true) {
+			this.mirror = -1;
+		}
+		else {
+			this.mirror = 1;
+		}
 
 		this.JointType = Object.freeze({
 		  0: 'SpineBase',
@@ -33,48 +40,45 @@ class kinectAvatar{
 		this.lines_in_world = [];
 
 		this.BoneLines = new Array();
-		this.boneGeometry = new THREE.SphereGeometry(this.bonesRadius, this.bonesDetail, this.bonesDetail);
-		this.meshPhongMaterial = new THREE.MeshPhongMaterial();
 
 		this.bonesDetail = 5;
 		this.bonesRadius = 5;
-		this.head = null;
 
-		this.limbsWidth = 0.03;
-		this.bodyWidth = 0.05;
+		this.limbsWidth = 0.03*this.scale;
+		this.bodyidth = 0.05*this.scale;
         // torso
-        this.BoneLines.push({ jointStart: "Head",             jointEnd: "Neck", width: this.bodyWidth });
-        this.BoneLines.push({ jointStart: "Neck",             jointEnd: "SpineShoulder", width: this.bodyWidth });
-        this.BoneLines.push({ jointStart: "SpineShoulder",    jointEnd: "SpineMid", width: this.bodyWidth });
-        this.BoneLines.push({ jointStart: "SpineMid",         jointEnd: "SpineBase", width: this.bodyWidth });
-        this.BoneLines.push({ jointStart: "SpineShoulder",    jointEnd: "ShoulderRight", width: this.bodyWidth });
-        this.BoneLines.push({ jointStart: "SpineShoulder",    jointEnd: "ShoulderLeft", width: this.bodyWidth });
-        this.BoneLines.push({ jointStart: "SpineBase",        jointEnd: "HipRight", width: this.bodyWidth });
-        this.BoneLines.push({ jointStart: "SpineBase",        jointEnd: "HipLeft", width: this.bodyWidth });
+        this.BoneLines.push({ jointStart: "Head",             jointEnd: "Neck", width: this.bodyidth });
+        this.BoneLines.push({ jointStart: "Neck",             jointEnd: "SpineShoulder", width: this.bodyidth });
+        this.BoneLines.push({ jointStart: "SpineShoulder",    jointEnd: "SpineMid", width: this.bodyidth });
+        this.BoneLines.push({ jointStart: "SpineMid",         jointEnd: "SpineBase", width: this.bodyidth });
+        this.BoneLines.push({ jointStart: "SpineShoulder",    jointEnd: "ShoulderRight", width: this.bodyidth });
+        this.BoneLines.push({ jointStart: "SpineShoulder",    jointEnd: "ShoulderLeft", width: this.bodyidth });
+        this.BoneLines.push({ jointStart: "SpineBase",        jointEnd: "HipRight", width: this.bodyidth });
+        this.BoneLines.push({ jointStart: "SpineBase",        jointEnd: "HipLeft", width: this.bodyidth });
 
         // right arm    
         this.BoneLines.push({ jointStart: "ShoulderRight",    jointEnd: "ElbowRight", width: this.limbsWidth });
         this.BoneLines.push({ jointStart: "ElbowRight",       jointEnd: "WristRight", width: this.limbsWidth });
         this.BoneLines.push({ jointStart: "WristRight",       jointEnd: "HandRight", width: this.limbsWidth });
-        this.BoneLines.push({ jointStart: "HandRight",        jointEnd: "HandTipRight", width: this.bodyWidth });
-        this.BoneLines.push({ jointStart: "WristRight",       jointEnd: "ThumbRight", width: this.bodyWidth });
+        this.BoneLines.push({ jointStart: "HandRight",        jointEnd: "HandTipRight", width: this.bodyidth });
+        this.BoneLines.push({ jointStart: "WristRight",       jointEnd: "ThumbRight", width: this.bodyidth });
 
         // left arm
         this.BoneLines.push({ jointStart: "ShoulderLeft",     jointEnd: "ElbowLeft", width: this.limbsWidth });
         this.BoneLines.push({ jointStart: "ElbowLeft",        jointEnd: "WristLeft", width: this.limbsWidth });
         this.BoneLines.push({ jointStart: "WristLeft",        jointEnd: "HandLeft", width: this.limbsWidth });
-        this.BoneLines.push({ jointStart: "HandLeft",         jointEnd: "HandTipLeft", width: this.bodyWidth });
-        this.BoneLines.push({ jointStart: "WristLeft",        jointEnd: "ThumbLeft", width: this.bodyWidth });
+        this.BoneLines.push({ jointStart: "HandLeft",         jointEnd: "HandTipLeft", width: this.bodyidth });
+        this.BoneLines.push({ jointStart: "WristLeft",        jointEnd: "ThumbLeft", width: this.bodyidth });
 
         // right leg
         this.BoneLines.push({ jointStart: "HipRight",         jointEnd: "KneeRight", width: this.limbsWidth });
         this.BoneLines.push({ jointStart: "KneeRight",        jointEnd: "AnkleRight", width: this.limbsWidth });
-        this.BoneLines.push({ jointStart: "AnkleRight",       jointEnd: "FootRight", width: this.bodyWidth });
+        this.BoneLines.push({ jointStart: "AnkleRight",       jointEnd: "FootRight", width: this.bodyidth });
 
         // left leg
         this.BoneLines.push({ jointStart: "HipLeft",          jointEnd: "KneeLeft", width: this.limbsWidth });
         this.BoneLines.push({ jointStart: "KneeLeft",         jointEnd: "AnkleLeft", width: this.limbsWidth });
-        this.BoneLines.push({ jointStart: "AnkleLeft",        jointEnd: "FootLeft", width: this.bodyWidth });
+        this.BoneLines.push({ jointStart: "AnkleLeft",        jointEnd: "FootLeft", width: this.bodyidth });
 
 		function swap(json){
 		  var ret = {};
@@ -85,49 +89,108 @@ class kinectAvatar{
 		}
 
 		this.inverseJointType = swap(this.JointType);
-
 		this.counter = 0;
-		this.bonesDetail = 5;
-		this.bonesRadius = 5;
-		this.leftHand = [];
-		this.rightHand = [];
-		this.body = [];
-		this.leftLeg = [];
-		this.rightLeg = [];
-		this.headGeometry = new THREE.SphereGeometry(15, 20, 20);
-		this.boneGeometry = new THREE.SphereGeometry(this.bonesRadius, this.bonesDetail, this.bonesDetail);
-		this.blueMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-		this.greenMaterial = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
 
-		this.meshPhongMaterial = new THREE.MeshPhongMaterial();
-		this.handRight = null;
 		this.world = world;
-		this.allMeshes = [];
-		this.allLines = [];
 
-		this.mesh = {};
-		this.skeletonHelper = {};
+		this.scene = this.world.scene;
+		this.active = false;
 
-		this.leftHandLine = [];
-		this.rightHandLine = [];
-		this.leftLegLine = [];
-		this.rightLegLine = [];
-		this.bodyLine = [];
+		this.line_material = new THREE.LineBasicMaterial({
+			color: 0x0000ff,
+			linewidth: 1
+		});
 
-		// Subscribe to the appropriate postal channel	
+
+		this.sphereMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+
+		this.material = new THREE.MeshNormalMaterial();
+
+		// hand
+		this.handMaterial = new THREE.MeshNormalMaterial();
+		var handRadius = 0.1*this.scale;
+		this.handGeometry = new THREE.SphereGeometry(handRadius);
+
+
+		var headRadius = 0.15*this.scale;
+		this.headGeometry = new THREE.SphereGeometry(headRadius),
+		this.headMaterial = new THREE.MeshNormalMaterial();
+
+		this.head = null;
+		this.handRight = null;
+		this.handLeft = null;
+
+		this.pantsMaterial = new THREE.MeshToonMaterial({color: 0x000000});
+		this.shirtMaterial =  new THREE.MeshToonMaterial({color: 0x5A6372});
+
+		this.quantoOneMaterial = new THREE.MeshBasicMaterial( {color: 0x3333cc} );
+		this.quantoTwoMaterial = new THREE.MeshBasicMaterial( {color: 0x009933} );
+		this.quantoThreeMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+		this.quantoFourMaterial = new THREE.MeshBasicMaterial( {color: 0xff0066} );
+		this.quantoFiveMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff} );
+		this.quantoNormal = new THREE.MeshNormalMaterial();
 	}
 
+	addToScene(scene){
+		this.active = true;
+		this.scene = scene;
+	}
+
+	removeFromScene(scene){
+		this.world.removeLines(this.lines_in_world);
+		this.active = false;
+		if (this.handRight != null) {
+			this.scene.remove(this.handRight);
+			this.handRight = null;
+		}
+		if (this.handLeft != null) {
+			this.scene.remove(this.handLeft);
+			this.handLeft = null;
+		}
+		if (this.head !=null) {			
+			this.scene.remove(this.head);
+			this.head = null;
+		}
+	}
+
+	doDispose (obj)
+    {
+        if (obj !== null)
+        {
+            for (var i = 0; i < obj.children.length; i++)
+            {
+                doDispose(obj.children[i]);
+            }
+            if (obj.geometry)
+            {
+                obj.geometry.dispose();
+                obj.geometry = undefined;
+            }
+            if (obj.material)
+            {
+                if (obj.material.map)
+                {
+                    obj.material.map.dispose();
+                    obj.material.map = undefined;
+                }
+                obj.material.dispose();
+                obj.material = undefined;
+            }
+        }
+        obj = undefined;
+    };
+
 	refresh(data){
+		if (!this.active) {
+			return;
+		}
+		// console.log(data);
 		if(this.counter == 0){
 			this.startTime = performance.now();
 		}
 
 		this.counter++;
 
-		if(this.bodyLine){
-			this.world.removeLines([this.bodyLine,this.leftLegLine,this.rightLegLine,this.leftHandLine,this.rightHandLine]);
-
-		}
 		if(this.counter % 1000 ==0){
 
 			var t1 = performance.now();
@@ -136,80 +199,88 @@ class kinectAvatar{
 
 		}
 
-
 		if (this.counter % 1000 == 0){
 			console.log('this.body ',this.body);
-
-			console.log('this.bodyLine ',this.bodyLine);
 		}
 
-		if (this.mesh) {
-			this.world.scene.remove(this.mesh);
+		// this.world.removeLines(this.lines_in_world);
+		for (i=0;i<this.lines_in_world.length;i++) {
+			this.world.scene.remove(this.lines_in_world[i]);
+			this.doDispose(this.lines_in_world[i]);
 		}
 
-		this.world.removeLines(this.lines_in_world);
+		// deallocate
+		this.lines_in_world = null;
+		this.lines_in_world = [];
 
-		var material = new THREE.LineBasicMaterial({
-			color: 0x0000ff,
-			linewidth: 1
-		});
+
 		var i;
 
-		function cylinderMesh(pointX, pointY, material, cylinderWidth) {
-		    var direction = new THREE.Vector3().subVectors(pointY, pointX);
+		function cylinderMesh(pointx, pointY, material, cylinderWidth) {
+		    var direction = new THREE.Vector3().subVectors(pointY, pointx);
 		    var orientation = new THREE.Matrix4();
-		    orientation.lookAt(pointX, pointY, new THREE.Object3D().up);
+		    orientation.lookAt(pointx, pointY, new THREE.Object3D().up);
 		    var m = new THREE.Matrix4(); m.set(1,0,0,0,0,0,1,0,0,-1,0,0,0,0,0,1); orientation.multiply(m); 
 		    var edgeGeometry = new THREE.CylinderGeometry(cylinderWidth, cylinderWidth, direction.length());
 		    var edge = new THREE.Mesh(edgeGeometry, material);
 		    edge.applyMatrix(orientation);
 		    // position based on midpoints - there may be a better solution than this
-		    edge.position.x = (pointY.x + pointX.x) / 2;
-		    edge.position.y = (pointY.y + pointX.y) / 2;
-		    edge.position.z = (pointY.z + pointX.z) / 2;
+		    edge.position.x = (pointY.x + pointx.x) / 2;
+		    edge.position.y = (pointY.y + pointx.y) / 2;
+		    edge.position.z = (pointY.z + pointx.z) / 2;
 		    return edge;
 		}
+
+		this.center = new THREE.Vector3(
+			(data.joints[this.inverseJointType["HipRight"]].x*this.scale*this.mirror+data.joints[this.inverseJointType["HipLeft"]].x*this.scale*this.mirror)/2, 
+			(data.joints[this.inverseJointType["HipRight"]].y*this.scale+data.joints[this.inverseJointType["HipLeft"]].y*this.scale)/2, 
+			(data.joints[this.inverseJointType["HipRight"]].z*this.scale+data.joints[this.inverseJointType["HipLeft"]].z*this.scale)/2);
+		//var pointY = new THREE.Vector3(data.joints[this.inverseJointType[jointEnd]].x*this.scale*this.mirror, data.joints[this.inverseJointType[jointEnd]].y*this.scale, data.joints[this.inverseJointType[jointEnd]].z*this.scale);
+
 
 		for (i=0; i<this.BoneLines.length;i++) {
 			var jointStart = this.BoneLines[i].jointStart;
 			var jointEnd = this.BoneLines[i].jointEnd;
 			var width = this.BoneLines[i].width;
-			var pointX = new THREE.Vector3(data.joints[this.inverseJointType[jointStart]].Xw, data.joints[this.inverseJointType[jointStart]].Yw, data.joints[this.inverseJointType[jointStart]].Zw);
-			var pointY = new THREE.Vector3(data.joints[this.inverseJointType[jointEnd]].Xw, data.joints[this.inverseJointType[jointEnd]].Yw, data.joints[this.inverseJointType[jointEnd]].Zw);
+			var pointx = new THREE.Vector3(data.joints[this.inverseJointType[jointStart]].x*this.scale*this.mirror, data.joints[this.inverseJointType[jointStart]].y*this.scale, data.joints[this.inverseJointType[jointStart]].z*this.scale);
+			var pointY = new THREE.Vector3(data.joints[this.inverseJointType[jointEnd]].x*this.scale*this.mirror, data.joints[this.inverseJointType[jointEnd]].y*this.scale, data.joints[this.inverseJointType[jointEnd]].z*this.scale);
+			// normalize 
+			pointx = this.center.clone().multiplyScalar(-1).add(pointx);
+			pointY = this.center.clone().multiplyScalar(-1).add(pointY);
 
-			var material = new THREE.MeshNormalMaterial();
-			var cylinderWidth = 0.05;
+
+			var material = this.material;
 
 			if (jointStart === "SpineMid" && jointEnd === "SpineBase") {
-				material = new THREE.MeshToonMaterial({color: 0x5A6372});
+				material = this.shirtMaterial;
 			}
 
 			if (jointStart === "SpineShoulder" && jointEnd === "SpineMid") {
-				material = new THREE.MeshToonMaterial({color: 0x5A6372});
+				material = this.shirtMaterial;
 			}
 
 			if (jointStart === "SpineShoulder" && jointEnd === "ShoulderRight") {
-				material = new THREE.MeshToonMaterial({color: 0x5A6372});
+				material = this.shirtMaterial;
 			}
 
 			if (jointStart === "SpineShoulder" && jointEnd === "ShoulderLeft") {
-				material = new THREE.MeshToonMaterial({color: 0x5A6372});
+				material = this.shirtMaterial;
 			}
 
 			if (jointStart === "SpineBase" && jointEnd === "HipRight") {
-				material = new THREE.MeshToonMaterial({color: 0x000000});
+				material = this.pantsMaterial;
 			}
 
 			if (jointStart === "SpineBase" && jointEnd === "HipLeft") {
-				material = new THREE.MeshToonMaterial({color: 0x000000});
+				material = this.pantsMaterial;
 			}
 
 			if (jointStart === "HipRight" && jointEnd === "KneeRight") {
-				material = new THREE.MeshToonMaterial({color: 0x000000});
+				material = this.pantsMaterial;
 			}
 
 			if (jointStart === "HipLeft" && jointEnd === "KneeLeft") {
-				material = new THREE.MeshToonMaterial({color: 0x000000});
+				material = this.pantsMaterial;
 			}
 
 			if (jointStart === "WristRight" && jointEnd === "ThumbRight") {
@@ -220,41 +291,29 @@ class kinectAvatar{
 				continue
 			}
 
-			var cylinder = cylinderMesh(pointX, pointY, material, width);
-/*			var geometry = new THREE.Geometry();
-			geometry.vertices.push(
-				new THREE.Vector3(data.joints[this.inverseJointType[jointStart]].Xw, data.joints[this.inverseJointType[jointStart]].Yw, data.joints[this.inverseJointType[jointStart]].Zw),
-				new THREE.Vector3(data.joints[this.inverseJointType[jointEnd]].Xw, data.joints[this.inverseJointType[jointEnd]].Yw, data.joints[this.inverseJointType[jointEnd]].Zw)
-			);
-			var line = new THREE.Line( geometry, material );
-*/
-			// if (this.lines_in_world.constructor === Array && this.lines_in_world.length > 0 ) {
-			// 	this.lines_in_world[i].				
-			// }
-			this.world.scene.add(cylinder);
+			var cylinder = cylinderMesh(pointx, pointY, material, width);
+
+			this.scene.add(cylinder);
 			this.lines_in_world.push(cylinder);
 		}
 
-		// create head now
-		// set up the sphere vars
-		var radius = 0.15;
-		// create the sphere's material
-		var sphereMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-
-		    
+//		var head = new THREE.Vector3(data.joints[this.inverseJointType["Head"]].x*this.scale*this.mirror, data.joints[this.inverseJointType["Head"]].y*this.scale, data.joints[this.inverseJointType["Head"]].z*this.scale);
+//		head = this.center.clone().multiplyScalar(-1).add(head);
 		if (this.head != null) {
-
-			this.head.position.set(data.joints[this.inverseJointType["Head"]].Xw, data.joints[this.inverseJointType["Head"]].Yw, data.joints[this.inverseJointType["Head"]].Zw);
+			this.head.position.set(data.joints[this.inverseJointType["Head"]].x*this.scale*this.mirror-this.center.x, data.joints[this.inverseJointType["Head"]].y*this.scale-this.center.y, data.joints[this.inverseJointType["Head"]].z*this.scale-this.center.z);
 		}
 		else {
-			console.log("adding head")
+			// console.log("adding head")
+
 			this.head = new THREE.Mesh(
-			   new THREE.SphereGeometry(radius),
-			   new THREE.MeshNormalMaterial());
+			   this.headGeometry,
+			   this.headMaterial
+			);
 
-			this.head.position.set(data.joints[this.inverseJointType["Head"]].Xw, data.joints[this.inverseJointType["Head"]].Yw, data.joints[this.inverseJointType["Head"]].Zw);
+//			this.head.position.set(head);
+			this.head.position.set(data.joints[this.inverseJointType["Head"]].x*this.scale*this.mirror-this.center.x, data.joints[this.inverseJointType["Head"]].y*this.scale-this.center.y, data.joints[this.inverseJointType["Head"]].z*this.scale-this.center.z);
 
-			this.world.scene.add(this.head);
+			this.scene.add(this.head);
 		}
 
 		this.createHandRight(data);
@@ -264,41 +323,37 @@ class kinectAvatar{
 	}
 
 	createHandRight(data) {
-		var radius = 0.1;
-		var sphereMaterial = new THREE.MeshNormalMaterial();
 
 		if (this.handRight != null) {
-			this.handRight.position.set(data.joints[this.inverseJointType["HandTipRight"]].Xw, data.joints[this.inverseJointType["HandTipRight"]].Yw, data.joints[this.inverseJointType["HandTipRight"]].Zw);
+			this.handRight.position.set(data.joints[this.inverseJointType["HandTipRight"]].x*this.scale*this.mirror-this.center.x, data.joints[this.inverseJointType["HandTipRight"]].y*this.scale-this.center.y, data.joints[this.inverseJointType["HandTipRight"]].z*this.scale-this.center.z);
 		}
 		else {
 			this.handRight = new THREE.Mesh(
-			   new THREE.SphereGeometry(radius),
-			   new THREE.MeshNormalMaterial());
+			   this.handGeometry,
+			   this.handMaterial);
 
-			this.handRight.position.set(data.joints[this.inverseJointType["HandTipRight"]].Xw, data.joints[this.inverseJointType["HandTipRight"]].Yw, data.joints[this.inverseJointType["HandTipRight"]].Zw);
+			this.handRight.position.set(data.joints[this.inverseJointType["HandTipRight"]].x*this.scale*this.mirror-this.center.x, data.joints[this.inverseJointType["HandTipRight"]].y*this.scale-this.center.y, data.joints[this.inverseJointType["HandTipRight"]].z*this.scale-this.center.z);
 
 			// add the sphere to the scene
-			this.world.scene.add(this.handRight);
+			this.scene.add(this.handRight);
 		}
 
 	}
 
 	createHandLeft(data) {
-		var radius = 0.1;
-		var sphereMaterial = new THREE.MeshNormalMaterial();
 
 		if (this.handLeft != null) {
-			this.handLeft.position.set(data.joints[this.inverseJointType["HandTipLeft"]].Xw, data.joints[this.inverseJointType["HandTipLeft"]].Yw, data.joints[this.inverseJointType["HandTipLeft"]].Zw);
+			this.handLeft.position.set(data.joints[this.inverseJointType["HandTipLeft"]].x*this.scale*this.mirror-this.center.x, data.joints[this.inverseJointType["HandTipLeft"]].y*this.scale-this.center.y, data.joints[this.inverseJointType["HandTipLeft"]].z*this.scale-this.center.z);
 		}
 		else {
 			this.handLeft = new THREE.Mesh(
-			   new THREE.SphereGeometry(radius),
-			   new THREE.MeshNormalMaterial());
+			   this.handGeometry,
+			   this.handMaterial);
 
-			this.handLeft.position.set(data.joints[this.inverseJointType["HandTipLeft"]].Xw, data.joints[this.inverseJointType["HandTipLeft"]].Yw, data.joints[this.inverseJointType["HandTipLeft"]].Zw);
+			this.handLeft.position.set(data.joints[this.inverseJointType["HandTipLeft"]].x*this.scale*this.mirror-this.center.x, data.joints[this.inverseJointType["HandTipLeft"]].y*this.scale-this.center.y, data.joints[this.inverseJointType["HandTipLeft"]].z*this.scale-this.center.z);
 
 			// add the sphere to the scene
-			this.world.scene.add(this.handLeft);
+			this.scene.add(this.handLeft);
 		}
 
 	}
@@ -306,30 +361,24 @@ class kinectAvatar{
 	refreshHands(bendQuanto) {
 		var color, material;
 		if (bendQuanto == 1) { 
-			color = 0x3333cc;
-			material = new THREE.MeshBasicMaterial( {color: color} );
+			material = this.quantoOneMaterial;
 		}
 		else if (bendQuanto == 2){
-			color = 0x009933;
-			material = new THREE.MeshBasicMaterial( {color: color} );
+			material = this.quantoTwoMaterial;
 		}
 		else if (bendQuanto == 3){
-			color = 0xffff00;
-			material = new THREE.MeshBasicMaterial( {color: color} );
+			material = this.quantoThreeMaterial;
 		}
 		else if (bendQuanto == 4){
-			color = 0xff0066;
-			material = new THREE.MeshBasicMaterial( {color: color} );
+			material = this.quantoFourMaterial;
 		}
 		else if (bendQuanto == 5){
-			color = 0xffffff;
-			material = new THREE.MeshBasicMaterial( {color: color} );
+			material = this.quantoFiveMaterial;
 		}
 		else {
-			material = new THREE.MeshNormalMaterial();
+			material = this.quantoNormal;
 		}
 		if (this.handLeft != null) {
-
 			this.handLeft.material = material;
 			material.needsUpdate = true;
 		}
