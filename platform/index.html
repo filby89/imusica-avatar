@@ -36,6 +36,7 @@
 				<tr><td>LH z position:</td> <td id="HL_z"></td> </tr> <br>
 				<tr><td>bendQuanto:</td> 	<td id="bendQuanto"></td> </tr> <br>
 				<tr><td>GestureDirection:</td> <td id="GestureDirection"></td> </tr> <br>
+				<tr><td>LeftX:</td> <td id="LeftX"></td> </tr> 
 				<tr><td>LeftY:</td> <td id="LeftY"></td> </tr> 
 				<tr><td>RightX:</td> <td id="RightX"></td> </tr> 
 				<tr><td>RightXVel:</td> <td id="RightXVel"></td> </tr> 
@@ -72,27 +73,32 @@
 
 function make_Instrument() {
 // create synth
-var instrument = new Tone.FMSynth();
+var instrument = new Tone.MonoSynth();
 var synthJSON = {
-    "harmonicity": 3.01,
-    "modulationIndex": 14,
     "oscillator": {
-        "type": "triangle"
+        "type": "fmsquare5",
+		"modulationType" : "triangle",
+      	"modulationIndex" : 2,
+      	"harmonicity" : 0.501
+    },
+    "filter": {
+        "Q": 1,
+        "type": "lowpass",
+        "rolloff": -24
     },
     "envelope": {
-        "attack": 0.2,
-        "decay": 0.3,
-        "sustain": 0.1,
-        "release": 1.2
-    },
-    "modulation" : {
-        "type": "square"
-    },
-    "modulationEnvelope" : {
         "attack": 0.01,
-        "decay": 0.5,
-        "sustain": 0.2,
-        "release": 0.1
+        "decay": 0.1,
+        "sustain": 0.8,
+        "release": 5
+    },
+    "filterEnvelope": {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 0.8,
+        "release": 5,
+        "baseFrequency": 50,
+        "octaves": 4.4
     }
 };
 
@@ -101,11 +107,9 @@ instrument.set(synthJSON);
 var effect1, effect2, effect3;
 
 // create effects
-var effect1 = new Tone.Vibrato();
+var effect1 = new Tone.Distortion();
 effect1JSON = {
-	"frequency": 2.3,
-	"depth": 0.4,
-	"type": "triangle",
+	"distortion" : 1.4,
     "wet": 0.5
 };
 effect1.set(effect1JSON);
@@ -142,7 +146,6 @@ return {
     };
 
 }
-
 /**
 * Executed when the page has finished loading.
 */
@@ -154,7 +157,7 @@ window.onload = function () {
 	var status = document.getElementById("status");
 
 	var synth = make_Instrument()['instrument'];
-
+	var running = 0;
 
 	if (!window.WebSocket) {
         status.innerHTML = "Your browser does not support web sockets!";
@@ -188,6 +191,16 @@ window.onload = function () {
 			// Create a JSON object.
             var jsonObject = JSON.parse(event.data);
 // console.log(jsonObject)
+			if (jsonObject.gesture) {
+				if (jsonObject.gesture == "start") {
+					console.log("Starting");
+					running = 1;
+				}
+				// else if (jsonObject.gesture == "stop") {
+				// 	running = 0;
+				// }
+			}
+
             if (jsonObject.skeletons) {
 	            avatar.refresh(jsonObject.skeletons[0]);
 	             for (var i = 0; i < jsonObject.skeletons.length; i++) {	
@@ -216,59 +229,109 @@ window.onload = function () {
 
 	        }    
 	        else {
-	        	console.log(jsonObject);
+	        	// console.log(jsonObject);
 				var RightX = jsonObject.RightX;
+				var LeftX = jsonObject.LeftX;
 				var LeftY = jsonObject.LeftY;
 				var GestureDirection = jsonObject.GestureDirection;			
 				var RightXVel = jsonObject.RightXVel;
 				if (RightX!= null) {
 					document.getElementById("RightX").innerHTML = RightX.toPrecision(4);
+					document.getElementById("LeftX").innerHTML = LeftX.toPrecision(4);
 					document.getElementById("LeftY").innerHTML = LeftY.toPrecision(4);
 					document.getElementById("GestureDirection").innerHTML = GestureDirection;
 					document.getElementById("RightXVel").innerHTML = RightXVel.toPrecision(4);
 				}
+	
+				var rightHandY = jsonObject.rightHandY;
+				var headY = jsonObject.headY;
+				console.log(rightHandY, headY);
 
+				if (rightHandY > headY + 0.2) {
+					running = 0;
+					console.log("Stopping");
+				}
+
+				// if (GestureDirection != "down") {
+				// 	return;
+				// }	
 
 				var pentatonic = [0, 2, 4, 7, 9, 12];
-				var bendQuanto = Math.floor((1 - LeftY)*(pentatonic.length - 1));
+				var bendQuantoY = Math.round(LeftY/0.166);
+				var bendQuantoX = Math.round(LeftX);
 				// console.log(" position bef= "+ LeftY + "; after= " + bendQuanto);
-				if (bendQuanto < 0 || bendQuanto > 5){
+				// if (bendQuantoX != bendQuantoY) {
+				// 	return;
+				// }
+				// else {
+					var bendQuanto = bendQuantoY;
+				// }
+
+				//
+				if (LeftY >= 0 && LeftY <=0.2) {
+					bendQuanto = 1;
+				}
+				else if (LeftY <= 0.4) {
+					bendQuanto = 2;
+				}
+				else if (LeftY <= 0.55) {
+					bendQuanto = 3;
+				}
+				else if (LeftY <= 0.7) {
+					bendQuanto = 4;
+				}
+				else if (LeftY <= 0.85) {
+					bendQuanto = 5;
+				}
+				else if (LeftY <= 1) {
+					bendQuanto = 6;
+				}
+				//
+
+
+				if (bendQuanto < 0 || bendQuanto > 6){
 					bendQuanto = 0;
 				}
 				
-				if (Date.now() - previousTime < 200 ) {
+				if (Date.now() - previousTime < 200) {
 					return;
 				}
 				else {
 					previousTime = Date.now();
 				}
+				if (running == 0) {
+					return;
+				}
+				var audio = null;
 
-				if (bendQuanto == 1) {
+				if (bendQuanto == 6) {
 					// play bendquanto note
 					var audio = new Audio('smokea.wav');
-				audio.play();
 					//play a middle 'C' for the duration of an 8th note
-					// synth.triggerAttackRelease("C4", Tone.Time(21).quantize(2));
-				}
-				else if (bendQuanto == 2) {
-					var audio = new Audio('smokeb.wav');
-				audio.play();
-					// synth.triggerAttackRelease("E4", Tone.Time(21).quantize(2));
-				}
-				else if (bendQuanto == 3) {
-					var audio = new Audio('smokec.wav');
-				audio.play();
-					// synth.triggerAttackRelease("G4", Tone.Time(21).quantize(2));
-				}
-				else if (bendQuanto == 4) {
-					var audio = new Audio('smoked.wav');
-				audio.play();
-					// synth.triggerAttackRelease("B4", Tone.Time(21).quantize(2));
+					// synth.triggerAttackRelease("G3", "8n");
 				}
 				else if (bendQuanto == 5) {
-					// synth.triggerAttackRelease("F", Tone.Time(21).quantize(2));
+					var audio = new Audio('smokeb.wav');
+					// synth.triggerAttackRelease("A3", "8n");
+				}
+				else if (bendQuanto == 4) {
+					var audio = new Audio('smokec.wav');
+					// synth.triggerAttackRelease("B3", "8n");
+				}
+				else if (bendQuanto == 3) {
+					var audio = new Audio('smoked.wav');
+					// synth.triggerAttackRelease("D4", "8n");
+				}
+				else if (bendQuanto == 2) {
+					// synth.triggerAttackRelease("E4", "8n");
+				}
+				else if (bendQuanto == 1) {
+					// synth.triggerAttackRelease("G4", "8n");
 				}
 
+				if (audio) {
+					audio.play();
+				}
 
 
 

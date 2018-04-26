@@ -24,9 +24,9 @@ class interactionWorld{
 		console.log(this.parentDomNode.offsetWidth, this.parentDomNode.offsetHeight)
 		this.parentDomNode.appendChild( this.renderer.domElement );
 		
-		this.camera.position.z = 30;
+		this.camera.position.z = -5;
 //		this.camera.position.x = 0;
-		this.camera.position.y = 30;
+		this.camera.position.y = 0;
 
 		this.orbit = new THREE.OrbitControls( this.camera, this.renderer.domElement );
 
