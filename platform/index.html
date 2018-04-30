@@ -64,8 +64,51 @@
 		<script type="text/javascript" src="kinectAvatar.js"></script>
 		<script type="text/javascript" src="world.js"></script>
 		<script type="text/javascript" src="Tone.js"></script>
+		<script type="text/javascript" src="THREE.MeshLine.js"></script>
+		<script src='https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js'></script>
+		<script src='https://surikov.github.io/webaudiofontdata/sound/0300_LesPaul_sf2.js'></script>
 		<script>
-		////// IMPORTANT PART ////////
+
+			var AudioContextFunc = window.AudioContext || window.webkitAudioContext;
+			var audioContext = new AudioContextFunc();
+			var player=new WebAudioFontPlayer();
+			player.loader.decodeAfterLoading(audioContext, '_tone_0300_LesPaul_sf2');
+			// function play(){
+			// 	player.queueWaveTable(audioContext, audioContext.destination
+			// 		, _tone_0300_LesPaul_sf2, 0, 12*4+7, 2);
+			// 	return false;
+			// }
+			// play();
+
+				// var D4 = [50-12,57-12,62-12,67-12];
+				// var F4 = [53,36,28,45,41,36];
+				// var G4 = [31,35,55,47,43,38];
+
+				var D4 = [54,50,45,38];
+				var F4 = [53,48,45,41,36,30];
+				var G4 = [55,47,43,38,35,31];
+				var Gs4 = [56,51,48,44,39,32];
+
+				player.queueChord(audioContext, audioContext.destination
+					, _tone_0300_LesPaul_sf2, 0, D4, 0.5);
+				
+				setTimeout(function(){
+				player.queueChord(audioContext, audioContext.destination
+					, _tone_0300_LesPaul_sf2, 0, F4, 0.5);
+
+				},500)
+
+				setTimeout(function(){
+				player.queueChord(audioContext, audioContext.destination
+					, _tone_0300_LesPaul_sf2, 0, G4, 0.5);
+				},1000)
+
+				setTimeout(function(){
+				player.queueChord(audioContext, audioContext.destination
+					, _tone_0300_LesPaul_sf2, 0, Gs4, 0.5);
+				},1500)
+
+
 		 var world = new interactionWorld(document.getElementById("world"));
 		 world.init();
 		 var avatar = new kinectAvatar(world,1,false);
@@ -186,6 +229,154 @@ window.onload = function () {
     */
     var previousTime = Date.now();
 
+
+
+// 					var sound = new Pizzicato.Sound({ 
+// 					    source: 'wave', 
+// 					    options: {
+// 					        frequency: 440
+// 					    }
+// 					});
+
+// 					sound.attack = 0.9;
+// 					sound.release = 0.9;
+
+// 					var tremolo = new Pizzicato.Effects.Tremolo({
+// 					    speed: 7,
+// 					    depth: 0.8,
+// 					    mix: 0.8
+// 					});
+
+// 					sound.addEffect(tremolo);
+
+// 					var quadrafuzz = new Pizzicato.Effects.Quadrafuzz({
+// 					    lowGain: 0.6,
+// 					    midLowGain: 0.8,
+// 					    midHighGain: 0.5,
+// 					    highGain: 0.6,
+// 					    mix: 1.0
+// 					});
+
+// sound.addEffect(quadrafuzz);
+
+// 					var distortion = new Pizzicato.Effects.Delay({
+// 					    gain: 0.4
+// 					});
+// 					sound.addEffect(distortion);
+
+// 					sound.volume = 1;
+// ///////////
+// 					var sound1 = new Pizzicato.Sound({ 
+// 					    source: 'wave', 
+// 					    options: {
+// 					        frequency: 880
+// 					    }
+// 					});
+
+// 					sound1.attack = 0.9;
+// 					sound1.release = 0.9;
+// 					sound1.volume = 0.7;
+// 					var tremolo = new Pizzicato.Effects.Tremolo({
+// 					    speed: 7,
+// 					    depth: 0.8,
+// 					    mix: 0.8
+// 					});
+
+// 					sound1.addEffect(tremolo);
+// 					var quadrafuzz = new Pizzicato.Effects.Quadrafuzz({
+// 					    lowGain: 0.6,
+// 					    midLowGain: 0.8,
+// 					    midHighGain: 0.5,
+// 					    highGain: 0.6,
+// 					    mix: 1.0
+// 					});
+
+// sound1.addEffect(quadrafuzz);
+
+// 					var distortion = new Pizzicato.Effects.Delay({
+// 					    gain: 0.4
+// 					});
+// 					sound1.addEffect(distortion);
+
+
+// ////////////////////////
+
+// 					var sound2 = new Pizzicato.Sound({ 
+// 					    source: 'wave', 
+// 					    options: {
+// 					        frequency: 880+440
+// 					    }
+// 					});
+// 					sound2.volume = 0.5;
+
+// 					sound2.attack = 0.9;
+// 					sound2.release = 0.9;
+
+// 					var tremolo = new Pizzicato.Effects.Tremolo({
+// 					    speed: 7,
+// 					    depth: 0.8,
+// 					    mix: 0.8
+// 					});
+
+// 					sound2.addEffect(tremolo);
+
+// 					var quadrafuzz = new Pizzicato.Effects.Quadrafuzz({
+// 					    lowGain: 0.6,
+// 					    midLowGain: 0.8,
+// 					    midHighGain: 0.5,
+// 					    highGain: 0.6,
+// 					    mix: 1.0
+// 					});
+
+// sound2.addEffect(quadrafuzz);
+
+// 					var distortion = new Pizzicato.Effects.Delay({
+// 					    gain: 0.4
+// 					});
+// 					sound2.addEffect(distortion);
+
+// ////////////////////////
+
+// 					var sound3 = new Pizzicato.Sound({ 
+// 					    source: 'wave', 
+// 					    options: {
+// 					        frequency: 880+880
+// 					    }
+// 					});
+// 					sound3.volume = 0.3;
+// 					sound3.attack = 0.9;
+// 					sound3.release = 0.9;
+
+// 					var tremolo = new Pizzicato.Effects.Tremolo({
+// 					    speed: 7,
+// 					    depth: 0.8,
+// 					    mix: 0.8
+// 					});
+
+// 					sound3.addEffect(tremolo);
+
+// 					var quadrafuzz = new Pizzicato.Effects.Quadrafuzz({
+// 					    lowGain: 0.6,
+// 					    midLowGain: 0.8,
+// 					    midHighGain: 0.5,
+// 					    highGain: 0.6,
+// 					    mix: 1.0
+// 					});
+
+// sound3.addEffect(quadrafuzz);
+
+// 					var distortion = new Pizzicato.Effects.Delay({
+// 					    gain: 0.4
+// 					});
+// 					sound3.addEffect(distortion);
+
+// 				var group = new Pizzicato.Group([sound, sound1, sound2, sound3]);
+
+// 					group.play();
+// 					setTimeout(function(){
+// 						group.stop();
+// 					},2000);
+
     socket.onmessage = function (event) {				
         if (typeof event.data === "string") {
 			// Create a JSON object.
@@ -268,22 +459,27 @@ window.onload = function () {
 				// }
 
 				//
-				if (LeftY >= 0 && LeftY <=0.2) {
+				// var delta = 0.05;
+
+				// var breakpoints = [0.15,0.3,0.45,0.6,0.75,0.9]
+				// var i;
+				
+				if (LeftY >= 0 && LeftY <=0.15) {
 					bendQuanto = 1;
 				}
-				else if (LeftY <= 0.4) {
+				else if (LeftY <= 0.3) {
 					bendQuanto = 2;
 				}
-				else if (LeftY <= 0.55) {
+				else if (LeftY <= 0.45) {
 					bendQuanto = 3;
 				}
-				else if (LeftY <= 0.7) {
+				else if (LeftY <= 0.6) {
 					bendQuanto = 4;
 				}
-				else if (LeftY <= 0.85) {
+				else if (LeftY <= 0.75) {
 					bendQuanto = 5;
 				}
-				else if (LeftY <= 1) {
+				else if (LeftY <= 0.9) {
 					bendQuanto = 6;
 				}
 				//
@@ -304,21 +500,32 @@ window.onload = function () {
 				}
 				var audio = null;
 
+					var audio = new Audio('smokec.wav');
+
 				if (bendQuanto == 6) {
 					// play bendquanto note
 					var audio = new Audio('smokea.wav');
 					//play a middle 'C' for the duration of an 8th note
 					// synth.triggerAttackRelease("G3", "8n");
+				player.queueWaveTable(audioContext, audioContext.destination
+					, _tone_0300_LesPaul_sf2, 0, 12*4+2, 1);
+
 				}
 				else if (bendQuanto == 5) {
 					var audio = new Audio('smokeb.wav');
+				player.queueWaveTable(audioContext, audioContext.destination
+					, _tone_0300_LesPaul_sf2, 0, 12*4+5, 1);
 					// synth.triggerAttackRelease("A3", "8n");
 				}
 				else if (bendQuanto == 4) {
+				player.queueWaveTable(audioContext, audioContext.destination
+					, _tone_0300_LesPaul_sf2, 0, 12*4+7, 1);
 					var audio = new Audio('smokec.wav');
 					// synth.triggerAttackRelease("B3", "8n");
 				}
 				else if (bendQuanto == 3) {
+				player.queueWaveTable(audioContext, audioContext.destination
+					, _tone_0300_LesPaul_sf2, 0, 12*4+8, 1);
 					var audio = new Audio('smoked.wav');
 					// synth.triggerAttackRelease("D4", "8n");
 				}
@@ -330,7 +537,7 @@ window.onload = function () {
 				}
 
 				if (audio) {
-					audio.play();
+					// audio.play();
 				}
 
 

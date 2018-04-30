@@ -104,17 +104,19 @@ class kinectAvatar{
 
 		this.sphereMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 
-		this.material = new THREE.MeshNormalMaterial();
+		var wireframe = false;
+
+		this.material = new THREE.MeshNormalMaterial({wireframe:wireframe});
 
 		// hand
 		this.handMaterial = new THREE.MeshNormalMaterial();
-		var handRadius = 0.1*this.scale;
+		var handRadius = 0.05*this.scale;
 		this.handGeometry = new THREE.SphereGeometry(handRadius);
 
 
 		var headRadius = 0.15*this.scale;
 		this.headGeometry = new THREE.SphereGeometry(headRadius),
-		this.headMaterial = new THREE.MeshNormalMaterial();
+		this.headMaterial = new THREE.MeshNormalMaterial({wireframe:wireframe});
 
 		this.head = null;
 		this.handRight = null;
@@ -181,6 +183,8 @@ class kinectAvatar{
     };
 
 	refresh(data){
+
+
 		if (!this.active) {
 			return;
 		}
@@ -236,7 +240,7 @@ class kinectAvatar{
 			(data.joints[this.inverseJointType["HipRight"]].y*this.scale+data.joints[this.inverseJointType["HipLeft"]].y*this.scale)/2, 
 			(data.joints[this.inverseJointType["HipRight"]].z*this.scale+data.joints[this.inverseJointType["HipLeft"]].z*this.scale)/2);
 		//var pointY = new THREE.Vector3(data.joints[this.inverseJointType[jointEnd]].x*this.scale*this.mirror, data.joints[this.inverseJointType[jointEnd]].y*this.scale, data.joints[this.inverseJointType[jointEnd]].z*this.scale);
-
+	
 
 		for (i=0; i<this.BoneLines.length;i++) {
 			var jointStart = this.BoneLines[i].jointStart;
@@ -318,8 +322,109 @@ class kinectAvatar{
 
 		this.createHandRight(data);
 		this.createHandLeft(data);
+		this.createGuitarLine(data);
+	}
+
+	// createGuitarLine1(data) {
+	// 	if (!this.guitarLine) {
+	// 		var colors = [
+	// 			0xed6a5a,
+	// 			0xf4f1bb,
+	// 			0x9bc1bc,
+	// 			0x5ca4a9,
+	// 			0xe6ebe0,
+	// 			0xf0b67f
+	// 		];
+	// 		var segment_size = 0.1;
+	// 		var num_segments = 6;
+	// 		var i;
+	// 		for (i=0;i<num_segments;i++) { 
+	// 			var geometry = new THREE.Geometry();
+	// 			geometry.vertices.push(
+	// 				new THREE.Vector3( -i*segment_size, i*segment_size, 0 ),
+	// 				new THREE.Vector3( -(i+1)*segment_size, (i+1)*segment_size, 0 )
+	// 			);
+
+	// 			var line = new MeshLine();
+	// 			line.setGeometry( geometry );
+
+	// 			var material = new MeshLineMaterial( {
+	// 				useMap: false,
+	// 				color: new THREE.Color( colors[i] ),
+	// 				opacity: 1,
+	// 				lineWidth: .1
+	// 			});
+
+	// 			var mesh = new THREE.Mesh( line.geometry, material );
+
+	// 			this.scene.add( mesh );
+	// 		}
 
 
+	// 		this.guitarLine = 5;
+	// 	}
+	// }
+
+	createGuitarLine(data) {
+		var num_segments = 5;
+
+		var cube_height = 0.2;
+		var cube_depth = 0.03;
+		var cube_length = 0.1;
+
+
+		var angle = 45;
+
+		var i = 0;
+
+		var geometry = new THREE.BoxGeometry( cube_length, cube_height, cube_depth );
+
+		var colors = [0xFFFA0D,0xE8760C,0xFF00A4,0x0C19E8,0x00FFB5];
+
+		if (!this.guitarLines) {
+			this.guitarLines = [];
+	
+			for (i=0;i<num_segments;i++) {
+				var material = new THREE.MeshBasicMaterial( {color: colors[i]} );
+				this.guitarLines.push(new THREE.Mesh( geometry, material));
+				this.guitarLines[i].rotation.z = angle;
+				this.scene.add(this.guitarLines[i]);
+
+
+				// this.guitarLines[i].position.set(
+				// 	(data.joints[this.inverseJointType["SpineMid"]].x+data.joints[this.inverseJointType["SpineShoulder"]].x)/2-this.center.x,
+				// 	(data.joints[this.inverseJointType["SpineMid"]].y+data.joints[this.inverseJointType["SpineShoulder"]].y)/2-this.center.y,
+				// 	(data.joints[this.inverseJointType["SpineMid"]].z+data.joints[this.inverseJointType["SpineShoulder"]].z)/2-this.center.z)
+
+			 //    var translation = new THREE.Matrix4();
+
+			 //    translation.set(
+			 //    	1,0,0,-cube_height/2 * Math.cos(angle * (Math.PI / 180)) - i*cube_height * Math.cos(angle * (Math.PI / 180)),
+			 //    	0,1,0,cube_height/2 * Math.sin(angle * (Math.PI / 180)) + i*cube_height * Math.sin(angle * (Math.PI / 180)),
+			 //    	0,0,1,0,
+			 //    	0,0,0,1); 
+
+			 //    this.guitarLines[i].applyMatrix(translation);
+			 //    this.guitarLines[i].rotation.z = angle;
+
+
+			}
+		}
+		else {
+			for (i=0;i<num_segments;i++) {
+				this.guitarLines[i].position.set(
+					(data.joints[this.inverseJointType["SpineMid"]].x+data.joints[this.inverseJointType["SpineBase"]].x)/2-this.center.x,
+					(data.joints[this.inverseJointType["SpineMid"]].y+data.joints[this.inverseJointType["SpineBase"]].y)/2-this.center.y,
+					(data.joints[this.inverseJointType["SpineMid"]].z+data.joints[this.inverseJointType["SpineBase"]].z)/2-this.center.z)
+	
+				this.guitarLines[i].position.y += cube_height/2 * Math.sin(angle * (Math.PI / 180)) + i*cube_height * Math.sin(angle * (Math.PI / 180));
+				this.guitarLines[i].position.x -= cube_height/2 * Math.cos(angle * (Math.PI / 180)) + i*cube_height * Math.cos(angle * (Math.PI / 180));
+				// this.guitarLines[i].
+				// this.guitarLines[i].position.y += i*cube_height/2;
+				// this.guitarLines[i].position.x -= i*cube_height/2;
+
+			}			
+		}
 	}
 
 	createHandRight(data) {

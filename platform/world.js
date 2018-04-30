@@ -16,7 +16,7 @@ class interactionWorld{
 		
 		
 		this.scene = new THREE.Scene();
-		this.scene.background = new THREE.Color( 0xffffff );
+		this.scene.background = new THREE.Color( 0xfafafa );
 
 		this.camera = new THREE.PerspectiveCamera( 60, this.parentDomNode.offsetWidth / this.parentDomNode.offsetHeight, 0.8, 1000 );
 		this.renderer = new THREE.WebGLRenderer();
