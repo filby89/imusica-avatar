@@ -45,6 +45,10 @@ class interactionWorld{
 		floor.position.y = -1.63;
 		this.scene.add( floor );
 
+
+
+
+
 		window.addEventListener( 'resize', this.onWindowResize.bind(this));
 //		this.addBox();
 		var that=this;

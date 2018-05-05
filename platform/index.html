@@ -26,22 +26,34 @@
 	    <h5 class="card-title">Details</h5>
 			<h6> <label id="status">None</label> </h6>
 
+<div class="form-group">
+  <label for="mode">Select list:</label>
+  <select class="form-control" id="mode">
+	        <option value="1">Air Guitar</option>
+	        <option value="2">Cello</option>
+	        <option value="3">Double Instrument</option>
+  </select>
+</div>
+        <button type="button" id="start-button"  class="btn btn-primary">Start Mode</button>
+        <br/>
 			<table class="table">
 			  <tbody>
 				<tr><td>RH x position:</td> <td id="HR_x"></td> </tr>
-				<tr><td>RH y position:</td> <td id="HR_y"></td> </tr> <br>
-				<tr><td>RH z position:</td> <td id="HR_z"></td> </tr> <br>
+				<tr><td>RH y position:</td> <td id="HR_y"></td> </tr> 
+				<tr><td>RH z position:</td> <td id="HR_z"></td> </tr> 
 				<tr><td>LH x position:</td> <td id="HL_x"></td> </tr>
-				<tr><td>LH y position:</td> <td id="HL_y"></td> </tr> <br>
-				<tr><td>LH z position:</td> <td id="HL_z"></td> </tr> <br>
-				<tr><td>bendQuanto:</td> 	<td id="bendQuanto"></td> </tr> <br>
-				<tr><td>GestureDirection:</td> <td id="GestureDirection"></td> </tr> <br>
+				<tr><td>LH y position:</td> <td id="HL_y"></td> </tr> 
+				<tr><td>LH z position:</td> <td id="HL_z"></td> </tr> 
+				<tr><td>bendQuanto:</td> 	<td id="bendQuanto"></td> </tr> 
+				<tr><td>GestureDirection:</td> <td id="GestureDirection"></td> </tr> 
 				<tr><td>LeftX:</td> <td id="LeftX"></td> </tr> 
 				<tr><td>LeftY:</td> <td id="LeftY"></td> </tr> 
 				<tr><td>RightX:</td> <td id="RightX"></td> </tr> 
 				<tr><td>RightXVel:</td> <td id="RightXVel"></td> </tr> 
 			  </tbody>
 			</table>
+
+
         <button type="button" id="stop-button"  class="btn btn-danger">Disconnect</button>
 	  </div>
 	</div>
@@ -57,22 +69,21 @@
 		</style>
 				
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
-		<script src="chat.js"></script>
 		<script src="three.js"></script>
 		<script src="OrbitControls.js"></script>
+		<script type="text/javascript" src="Pizzicato.js"></script>
 		<script type="text/javascript" src="kinectAvatar.js"></script>
 		<script type="text/javascript" src="world.js"></script>
 		<script type="text/javascript" src="Tone.js"></script>
 		<script type="text/javascript" src="THREE.MeshLine.js"></script>
+		<script type="text/javascript" src="pitchVolumeOrgan.js"></script>
 		<script src='https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js'></script>
 		<script src='https://surikov.github.io/webaudiofontdata/sound/0300_LesPaul_sf2.js'></script>
+		<script src='https://surikov.github.io/webaudiofontdata/sound/0130_FluidR3_GM_sf2_file.js'></script>
 		<script>
 
-			var AudioContextFunc = window.AudioContext || window.webkitAudioContext;
-			var audioContext = new AudioContextFunc();
-			var player=new WebAudioFontPlayer();
-			player.loader.decodeAfterLoading(audioContext, '_tone_0300_LesPaul_sf2');
 			// function play(){
 			// 	player.queueWaveTable(audioContext, audioContext.destination
 			// 		, _tone_0300_LesPaul_sf2, 0, 12*4+7, 2);
@@ -84,14 +95,14 @@
 				// var F4 = [53,36,28,45,41,36];
 				// var G4 = [31,35,55,47,43,38];
 
-				var D4 = [54,50,45,38];
-				var F4 = [53,48,45,41,36,30];
-				var G4 = [55,47,43,38,35,31];
-				var Gs4 = [56,51,48,44,39,32];
-
+				// var D4 = [54,50,45,38];
+				// var F4 = [53,48,45,41,36,30];
+				// var G4 = [55,47,43,38,35,31];
+				// var Gs4 = [56,51,48,44,39,32];
+/*
 				player.queueChord(audioContext, audioContext.destination
 					, _tone_0300_LesPaul_sf2, 0, D4, 0.5);
-				
+
 				setTimeout(function(){
 				player.queueChord(audioContext, audioContext.destination
 					, _tone_0300_LesPaul_sf2, 0, F4, 0.5);
@@ -108,12 +119,12 @@
 					, _tone_0300_LesPaul_sf2, 0, Gs4, 0.5);
 				},1500)
 
-
+*/
 		 var world = new interactionWorld(document.getElementById("world"));
 		 world.init();
 		 var avatar = new kinectAvatar(world,1,false);
 		 avatar.addToScene(world.scene);
-
+/*
 function make_Instrument() {
 // create synth
 var instrument = new Tone.MonoSynth();
@@ -189,6 +200,7 @@ return {
     };
 
 }
+*/
 /**
 * Executed when the page has finished loading.
 */
@@ -199,7 +211,7 @@ window.onload = function () {
     var label = document.getElementById("status-label");
 	var status = document.getElementById("status");
 
-	var synth = make_Instrument()['instrument'];
+//	var synth = make_Instrument()['instrument'];
 	var running = 0;
 
 	if (!window.WebSocket) {
@@ -212,6 +224,33 @@ window.onload = function () {
 	
     // Connect to the WebSocket server!
     var socket = new WebSocket("ws://localhost:8181");
+
+    /* modes:
+	0: idle
+	1: air guitar
+	2: cello
+	3: double instrument
+    */
+
+    var mode = 0;
+  	var buttonSwitchMode = $("#start-button");	
+  	var guitar = null;
+    buttonSwitchMode.click(function(){
+    	if (mode > 0) {
+    		buttonSwitchMode.addClass("btn-primary");
+    		buttonSwitchMode.removeClass("btn-warning");
+    		buttonSwitchMode.html("Start");
+    		mode = 0;
+    	}
+    	else {
+    		buttonSwitchMode.addClass("btn-warning");
+    		buttonSwitchMode.removeClass("btn-primary");
+    		buttonSwitchMode.html("Stop");
+	    	mode = parseInt($("#mode").val());    		
+    	}
+    	console.log("Mode:", mode)
+    });
+	            	p = new PitchVolumeOrgan(); 
 
     /**
     * WebSocket onopen event.
@@ -377,6 +416,33 @@ window.onload = function () {
 // 						group.stop();
 // 					},2000);
 
+	function doDispose (obj)
+    {
+        if (obj !== null)
+        {
+            for (var i = 0; i < obj.children.length; i++)
+            {
+                doDispose(obj.children[i]);
+            }
+            if (obj.geometry)
+            {
+                obj.geometry.dispose();
+                obj.geometry = undefined;
+            }
+            if (obj.material)
+            {
+                if (obj.material.map)
+                {
+                    obj.material.map.dispose();
+                    obj.material.map = undefined;
+                }
+                obj.material.dispose();
+                obj.material = undefined;
+            }
+        }
+        obj = undefined;
+    };
+
     socket.onmessage = function (event) {				
         if (typeof event.data === "string") {
 			// Create a JSON object.
@@ -394,6 +460,55 @@ window.onload = function () {
 
             if (jsonObject.skeletons) {
 	            avatar.refresh(jsonObject.skeletons[0]);
+
+		if (mode == 1) {
+			if (guitar == null) {
+			    var img = new THREE.MeshBasicMaterial({ //CHANGED to MeshBasicMaterial
+			        map:THREE.ImageUtils.loadTexture('guitar.gif'),
+			        transparent: true
+			    });
+			    img.crossOrigin = "anonymous";
+
+			    img.map.needsUpdate = true; //ADDED
+
+			    // plane
+			    guitar = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 1),img);
+			    guitar.rotation.y = Math.PI;
+			    guitar.position.x = 0.2;
+			    guitar.overdraw = true;
+			    world.scene.add(guitar);	
+			}
+		}
+		else {
+			world.scene.remove(guitar);
+			doDispose(guitar);
+			guitar = null;
+		}
+
+
+
+	            ///// pitch-volume
+	            if (mode < 2) {
+	            	return;
+	            }
+	            else if (mode == 2){
+	            	p.refresh(jsonObject.skeletons[0]);
+	            }
+	            else if (mode == 3){
+	            	
+	            }
+
+
+	            var data = jsonObject.skeletons[0];
+				var rightHandY = data.joints[11].y;
+				var headY = data.joints[3].y;
+			//	console.log(rightHandY,headY);
+				if (rightHandY > headY + 0.2) {
+					running = 0;
+					console.log("Stopping");
+				}
+
+
 	             for (var i = 0; i < jsonObject.skeletons.length; i++) {	
 						for (var j = 0; j < jsonObject.skeletons[i].joints.length; j++) {
 						var joint = jsonObject.skeletons[i].joints[j];
@@ -420,6 +535,13 @@ window.onload = function () {
 
 	        }    
 	        else {
+
+
+	            if (mode != 1) {
+	            	return;
+	            }
+
+
 	        	// console.log(jsonObject);
 				var RightX = jsonObject.RightX;
 				var LeftX = jsonObject.LeftX;
@@ -436,12 +558,6 @@ window.onload = function () {
 	
 				var rightHandY = jsonObject.rightHandY;
 				var headY = jsonObject.headY;
-				console.log(rightHandY, headY);
-
-				if (rightHandY > headY + 0.2) {
-					running = 0;
-					console.log("Stopping");
-				}
 
 				// if (GestureDirection != "down") {
 				// 	return;
@@ -450,20 +566,9 @@ window.onload = function () {
 				var pentatonic = [0, 2, 4, 7, 9, 12];
 				var bendQuantoY = Math.round(LeftY/0.166);
 				var bendQuantoX = Math.round(LeftX);
-				// console.log(" position bef= "+ LeftY + "; after= " + bendQuanto);
-				// if (bendQuantoX != bendQuantoY) {
-				// 	return;
-				// }
-				// else {
-					var bendQuanto = bendQuantoY;
-				// }
 
-				//
-				// var delta = 0.05;
+				var bendQuanto = bendQuantoY;
 
-				// var breakpoints = [0.15,0.3,0.45,0.6,0.75,0.9]
-				// var i;
-				
 				if (LeftY >= 0 && LeftY <=0.15) {
 					bendQuanto = 1;
 				}

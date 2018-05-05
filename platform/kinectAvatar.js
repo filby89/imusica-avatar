@@ -322,7 +322,7 @@ class kinectAvatar{
 
 		this.createHandRight(data);
 		this.createHandLeft(data);
-		this.createGuitarLine(data);
+	//	this.createGuitarLine(data);
 	}
 
 	// createGuitarLine1(data) {
