@@ -30,23 +30,45 @@ class interactionWorld{
 
 		this.orbit = new THREE.OrbitControls( this.camera, this.renderer.domElement );
 
-		var light = new THREE.PointLight( 0xff0000, 2, 100 );
-		light.position.set( 2, -1, -2 );
+		var light = new THREE.PointLight( 0xc8aa8e, 2, 100 );
+		light.position.set( 0, 2, -4 );
 		this.scene.add( light )
 
+
+		// floor
 		var geometry = new THREE.PlaneGeometry( 5, 5);
-		var material = new THREE.MeshBasicMaterial( {color: 0x608038, side: THREE.DoubleSide} );
+		var material = new THREE.MeshLambertMaterial( {color: 0x608038, side: THREE.DoubleSide} );
 		var floor = new THREE.Mesh( geometry, material );
 		floor.material.side = THREE.DoubleSide;
 
-		var rotX = (75 * Math.PI)/180;
+		var rotX = (90 * Math.PI)/180;
 
 		floor.rotation.x = rotX;
-		floor.position.y = -1.63;
+		floor.position.y = -0.9;
 		this.scene.add( floor );
 
+		//wall 1
+		var geometry = new THREE.PlaneGeometry( 5, 3);
+		var material = new THREE.MeshLambertMaterial( {color: 0xc8aa8e, side: THREE.DoubleSide} );
 
+		var wall1 = new THREE.Mesh( geometry, material );
+		var wall2 = new THREE.Mesh( geometry, material );
+		var wall3 = new THREE.Mesh( geometry, material );
 
+		wall1.position.x = -2.5;
+		wall1.position.y = 0.6;
+		wall1.rotation.y = (90*Math.PI)/180;
+
+		wall2.position.x = 2.5;
+		wall2.position.y = 0.6;
+		wall2.rotation.y = (90*Math.PI)/180;
+
+		wall3.position.z = 2.5;
+		wall3.position.y = 0.6;
+
+		this.scene.add( wall1 );
+		this.scene.add( wall2 );
+		this.scene.add( wall3 );
 
 
 		window.addEventListener( 'resize', this.onWindowResize.bind(this));

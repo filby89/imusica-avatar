@@ -123,7 +123,7 @@ class kinectAvatar{
 		this.handLeft = null;
 
 		this.pantsMaterial = new THREE.MeshToonMaterial({color: 0x000000});
-		this.shirtMaterial =  new THREE.MeshToonMaterial({color: 0x5A6372});
+		this.shirtMaterial =  new THREE.MeshBasicMaterial({color: 0xb70e4d});
 
 		this.quantoOneMaterial = new THREE.MeshBasicMaterial( {color: 0x3333cc} );
 		this.quantoTwoMaterial = new THREE.MeshBasicMaterial( {color: 0x009933} );
@@ -188,7 +188,7 @@ class kinectAvatar{
 		if (!this.active) {
 			return;
 		}
-		// console.log(data);
+
 		if(this.counter == 0){
 			this.startTime = performance.now();
 		}

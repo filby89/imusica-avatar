@@ -35,7 +35,7 @@
   </select>
 </div>
         <button type="button" id="start-button"  class="btn btn-primary">Start Mode</button>
-        <br/>
+
 			<table class="table">
 			  <tbody>
 				<tr><td>RH x position:</td> <td id="HR_x"></td> </tr>
@@ -46,10 +46,8 @@
 				<tr><td>LH z position:</td> <td id="HL_z"></td> </tr> 
 				<tr><td>bendQuanto:</td> 	<td id="bendQuanto"></td> </tr> 
 				<tr><td>GestureDirection:</td> <td id="GestureDirection"></td> </tr> 
-				<tr><td>LeftX:</td> <td id="LeftX"></td> </tr> 
-				<tr><td>LeftY:</td> <td id="LeftY"></td> </tr> 
 				<tr><td>RightX:</td> <td id="RightX"></td> </tr> 
-				<tr><td>RightXVel:</td> <td id="RightXVel"></td> </tr> 
+<!--				<tr><td>RightXVel:</td> <td id="RightXVel"></td> </tr>   -->
 			  </tbody>
 			</table>
 
@@ -66,6 +64,9 @@
 		#world {
 			min-height: 540px;
 		}
+		.table {
+			margin-top: 50px;
+		}
 		</style>
 				
 
@@ -79,140 +80,28 @@
 		<script type="text/javascript" src="Tone.js"></script>
 		<script type="text/javascript" src="THREE.MeshLine.js"></script>
 		<script type="text/javascript" src="pitchVolumeOrgan.js"></script>
+		<script type="text/javascript" src="airGuitar.js"></script>
+		<script type="text/javascript" src="airCello.js"></script>
 		<script src='https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js'></script>
 		<script src='https://surikov.github.io/webaudiofontdata/sound/0300_LesPaul_sf2.js'></script>
 		<script src='https://surikov.github.io/webaudiofontdata/sound/0130_FluidR3_GM_sf2_file.js'></script>
 		<script>
 
-			// function play(){
-			// 	player.queueWaveTable(audioContext, audioContext.destination
-			// 		, _tone_0300_LesPaul_sf2, 0, 12*4+7, 2);
-			// 	return false;
-			// }
-			// play();
-
-				// var D4 = [50-12,57-12,62-12,67-12];
-				// var F4 = [53,36,28,45,41,36];
-				// var G4 = [31,35,55,47,43,38];
-
-				// var D4 = [54,50,45,38];
-				// var F4 = [53,48,45,41,36,30];
-				// var G4 = [55,47,43,38,35,31];
-				// var Gs4 = [56,51,48,44,39,32];
-/*
-				player.queueChord(audioContext, audioContext.destination
-					, _tone_0300_LesPaul_sf2, 0, D4, 0.5);
-
-				setTimeout(function(){
-				player.queueChord(audioContext, audioContext.destination
-					, _tone_0300_LesPaul_sf2, 0, F4, 0.5);
-
-				},500)
-
-				setTimeout(function(){
-				player.queueChord(audioContext, audioContext.destination
-					, _tone_0300_LesPaul_sf2, 0, G4, 0.5);
-				},1000)
-
-				setTimeout(function(){
-				player.queueChord(audioContext, audioContext.destination
-					, _tone_0300_LesPaul_sf2, 0, Gs4, 0.5);
-				},1500)
-
-*/
-		 var world = new interactionWorld(document.getElementById("world"));
-		 world.init();
-		 var avatar = new kinectAvatar(world,1,false);
-		 avatar.addToScene(world.scene);
-/*
-function make_Instrument() {
-// create synth
-var instrument = new Tone.MonoSynth();
-var synthJSON = {
-    "oscillator": {
-        "type": "fmsquare5",
-		"modulationType" : "triangle",
-      	"modulationIndex" : 2,
-      	"harmonicity" : 0.501
-    },
-    "filter": {
-        "Q": 1,
-        "type": "lowpass",
-        "rolloff": -24
-    },
-    "envelope": {
-        "attack": 0.01,
-        "decay": 0.1,
-        "sustain": 0.8,
-        "release": 5
-    },
-    "filterEnvelope": {
-        "attack": 0.01,
-        "decay": 0.1,
-        "sustain": 0.8,
-        "release": 5,
-        "baseFrequency": 50,
-        "octaves": 4.4
-    }
-};
-
-instrument.set(synthJSON);
-
-var effect1, effect2, effect3;
-
-// create effects
-var effect1 = new Tone.Distortion();
-effect1JSON = {
-	"distortion" : 1.4,
-    "wet": 0.5
-};
-effect1.set(effect1JSON);
-
-
-// make connections
-instrument.connect(effect1);
-effect1.connect(Tone.Master);
-
-// define deep dispose function
-function deep_dispose() {
-    if(effect1 != undefined && effect1 != null) {
-        effect1.dispose();
-        effect1 = null;
-    }
-    if(effect2 != undefined && effect2 != null) {
-        effect2.dispose();
-        effect2 = null;
-    }
-    if(effect3 != undefined && effect3 != null) {
-        effect3.dispose();
-        effect3 = null;
-    }
-    if(instrument != undefined && instrument != null) {
-        instrument.dispose();
-        instrument = null;
-    }
-}
-
-
-return {
-    instrument: instrument,
-    deep_dispose: deep_dispose
-    };
-
-}
-*/
-/**
-* Executed when the page has finished loading.
-*/
 window.onload = function () {
-
-
   	var buttonStop = document.getElementById("stop-button");	
     var label = document.getElementById("status-label");
 	var status = document.getElementById("status");
-
-//	var synth = make_Instrument()['instrument'];
 	var running = 0;
+
+
+	 var world = new interactionWorld(document.getElementById("world"));
+	 world.init();
+	 var avatar = new kinectAvatar(world,1,false);
+	 avatar.addToScene(world.scene);
+	 var pitchVolumeOrgan = new PitchVolumeOrgan(); 
+	 var airCello = new AirCello(world, avatar); 
+	 var airGuitar = new AirGuitar(world, avatar); 
+
 
 	if (!window.WebSocket) {
         status.innerHTML = "Your browser does not support web sockets!";
@@ -221,9 +110,7 @@ window.onload = function () {
     }
 
     status.innerHTML = "Connecting to server...";
-	
-    // Connect to the WebSocket server!
-    var socket = new WebSocket("ws://localhost:8181");
+	    var socket = new WebSocket("ws://localhost:8181");
 
     /* modes:
 	0: idle
@@ -234,7 +121,7 @@ window.onload = function () {
 
     var mode = 0;
   	var buttonSwitchMode = $("#start-button");	
-  	var guitar = null;
+
     buttonSwitchMode.click(function(){
     	if (mode > 0) {
     		buttonSwitchMode.addClass("btn-primary");
@@ -248,267 +135,51 @@ window.onload = function () {
     		buttonSwitchMode.html("Stop");
 	    	mode = parseInt($("#mode").val());    		
     	}
-    	console.log("Mode:", mode)
+
+    	if (mode == 1) {
+    		airGuitar.add_to_world();
+    	}
+    	else {
+    		airGuitar.remove_from_world();
+    	}
+
+    	if (mode == 2) {
+    		airCello.add_to_world();
+    	}
+    	else {
+    		airCello.remove_from_world();
+    	}
+
     });
-	            	p = new PitchVolumeOrgan(); 
-
-    /**
-    * WebSocket onopen event.
-    */
-    // Connection established.
-    socket.onopen = function () {
-		//socket.send("get-gestures") ;
-        status.innerHTML = "Connection successful.";
-        status.classList.add("text-success");
-		console.log("Connection successful.");
-    };
-	
-    /**
-    * WebSocket onmessage event.
-    */
-    var previousTime = Date.now();
-
-
-
-// 					var sound = new Pizzicato.Sound({ 
-// 					    source: 'wave', 
-// 					    options: {
-// 					        frequency: 440
-// 					    }
-// 					});
-
-// 					sound.attack = 0.9;
-// 					sound.release = 0.9;
-
-// 					var tremolo = new Pizzicato.Effects.Tremolo({
-// 					    speed: 7,
-// 					    depth: 0.8,
-// 					    mix: 0.8
-// 					});
-
-// 					sound.addEffect(tremolo);
-
-// 					var quadrafuzz = new Pizzicato.Effects.Quadrafuzz({
-// 					    lowGain: 0.6,
-// 					    midLowGain: 0.8,
-// 					    midHighGain: 0.5,
-// 					    highGain: 0.6,
-// 					    mix: 1.0
-// 					});
-
-// sound.addEffect(quadrafuzz);
-
-// 					var distortion = new Pizzicato.Effects.Delay({
-// 					    gain: 0.4
-// 					});
-// 					sound.addEffect(distortion);
-
-// 					sound.volume = 1;
-// ///////////
-// 					var sound1 = new Pizzicato.Sound({ 
-// 					    source: 'wave', 
-// 					    options: {
-// 					        frequency: 880
-// 					    }
-// 					});
-
-// 					sound1.attack = 0.9;
-// 					sound1.release = 0.9;
-// 					sound1.volume = 0.7;
-// 					var tremolo = new Pizzicato.Effects.Tremolo({
-// 					    speed: 7,
-// 					    depth: 0.8,
-// 					    mix: 0.8
-// 					});
-
-// 					sound1.addEffect(tremolo);
-// 					var quadrafuzz = new Pizzicato.Effects.Quadrafuzz({
-// 					    lowGain: 0.6,
-// 					    midLowGain: 0.8,
-// 					    midHighGain: 0.5,
-// 					    highGain: 0.6,
-// 					    mix: 1.0
-// 					});
-
-// sound1.addEffect(quadrafuzz);
-
-// 					var distortion = new Pizzicato.Effects.Delay({
-// 					    gain: 0.4
-// 					});
-// 					sound1.addEffect(distortion);
-
-
-// ////////////////////////
-
-// 					var sound2 = new Pizzicato.Sound({ 
-// 					    source: 'wave', 
-// 					    options: {
-// 					        frequency: 880+440
-// 					    }
-// 					});
-// 					sound2.volume = 0.5;
-
-// 					sound2.attack = 0.9;
-// 					sound2.release = 0.9;
-
-// 					var tremolo = new Pizzicato.Effects.Tremolo({
-// 					    speed: 7,
-// 					    depth: 0.8,
-// 					    mix: 0.8
-// 					});
-
-// 					sound2.addEffect(tremolo);
-
-// 					var quadrafuzz = new Pizzicato.Effects.Quadrafuzz({
-// 					    lowGain: 0.6,
-// 					    midLowGain: 0.8,
-// 					    midHighGain: 0.5,
-// 					    highGain: 0.6,
-// 					    mix: 1.0
-// 					});
-
-// sound2.addEffect(quadrafuzz);
-
-// 					var distortion = new Pizzicato.Effects.Delay({
-// 					    gain: 0.4
-// 					});
-// 					sound2.addEffect(distortion);
-
-// ////////////////////////
-
-// 					var sound3 = new Pizzicato.Sound({ 
-// 					    source: 'wave', 
-// 					    options: {
-// 					        frequency: 880+880
-// 					    }
-// 					});
-// 					sound3.volume = 0.3;
-// 					sound3.attack = 0.9;
-// 					sound3.release = 0.9;
-
-// 					var tremolo = new Pizzicato.Effects.Tremolo({
-// 					    speed: 7,
-// 					    depth: 0.8,
-// 					    mix: 0.8
-// 					});
-
-// 					sound3.addEffect(tremolo);
-
-// 					var quadrafuzz = new Pizzicato.Effects.Quadrafuzz({
-// 					    lowGain: 0.6,
-// 					    midLowGain: 0.8,
-// 					    midHighGain: 0.5,
-// 					    highGain: 0.6,
-// 					    mix: 1.0
-// 					});
-
-// sound3.addEffect(quadrafuzz);
-
-// 					var distortion = new Pizzicato.Effects.Delay({
-// 					    gain: 0.4
-// 					});
-// 					sound3.addEffect(distortion);
-
-// 				var group = new Pizzicato.Group([sound, sound1, sound2, sound3]);
-
-// 					group.play();
-// 					setTimeout(function(){
-// 						group.stop();
-// 					},2000);
-
-	function doDispose (obj)
-    {
-        if (obj !== null)
-        {
-            for (var i = 0; i < obj.children.length; i++)
-            {
-                doDispose(obj.children[i]);
-            }
-            if (obj.geometry)
-            {
-                obj.geometry.dispose();
-                obj.geometry = undefined;
-            }
-            if (obj.material)
-            {
-                if (obj.material.map)
-                {
-                    obj.material.map.dispose();
-                    obj.material.map = undefined;
-                }
-                obj.material.dispose();
-                obj.material = undefined;
-            }
-        }
-        obj = undefined;
-    };
 
     socket.onmessage = function (event) {				
         if (typeof event.data === "string") {
 			// Create a JSON object.
             var jsonObject = JSON.parse(event.data);
-// console.log(jsonObject)
+
 			if (jsonObject.gesture) {
 				if (jsonObject.gesture == "start") {
-					console.log("Starting");
 					running = 1;
+					console.log("Starting");
 				}
-				// else if (jsonObject.gesture == "stop") {
-				// 	running = 0;
-				// }
+			}
+
+            if (jsonObject.skeletons) {
+				if (rightHandY > headY + 0.2) {
+		            var data = jsonObject.skeletons[0];
+					var rightHandY = data.joints[11].y;
+					var headY = data.joints[3].y;
+
+					running = 0;
+					console.log("Stopping");
+				}
 			}
 
             if (jsonObject.skeletons) {
 	            avatar.refresh(jsonObject.skeletons[0]);
 
-		if (mode == 1) {
-			if (guitar == null) {
-			    var img = new THREE.MeshBasicMaterial({ //CHANGED to MeshBasicMaterial
-			        map:THREE.ImageUtils.loadTexture('guitar.gif'),
-			        transparent: true
-			    });
-			    img.crossOrigin = "anonymous";
 
-			    img.map.needsUpdate = true; //ADDED
-
-			    // plane
-			    guitar = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 1),img);
-			    guitar.rotation.y = Math.PI;
-			    guitar.position.x = 0.2;
-			    guitar.overdraw = true;
-			    world.scene.add(guitar);	
-			}
-		}
-		else {
-			world.scene.remove(guitar);
-			doDispose(guitar);
-			guitar = null;
-		}
-
-
-
-	            ///// pitch-volume
-	            if (mode < 2) {
-	            	return;
-	            }
-	            else if (mode == 2){
-	            	p.refresh(jsonObject.skeletons[0]);
-	            }
-	            else if (mode == 3){
-	            	
-	            }
-
-
-	            var data = jsonObject.skeletons[0];
-				var rightHandY = data.joints[11].y;
-				var headY = data.joints[3].y;
-			//	console.log(rightHandY,headY);
-				if (rightHandY > headY + 0.2) {
-					running = 0;
-					console.log("Stopping");
-				}
-
-
+				// refresh html elements
 	             for (var i = 0; i < jsonObject.skeletons.length; i++) {	
 						for (var j = 0; j < jsonObject.skeletons[i].joints.length; j++) {
 						var joint = jsonObject.skeletons[i].joints[j];
@@ -533,131 +204,25 @@ window.onload = function () {
 	                }
 	            }
 
+	            // play sound
+
+	            if (running || true) {
+					if (mode == 1) { 
+						airGuitar.refresh(jsonObject.skeletons[0]);
+					}
+					if (mode == 2) { 
+						airCello.refresh(jsonObject.skeletons[0]);
+					}
+					else if (mode == 3) {
+		            	pitchVolumeOrgan.refresh(jsonObject.skeletons[0]);					
+					}	            	
+	            }
+
 	        }    
-	        else {
-
-
-	            if (mode != 1) {
-	            	return;
-	            }
-
-
-	        	// console.log(jsonObject);
-				var RightX = jsonObject.RightX;
-				var LeftX = jsonObject.LeftX;
-				var LeftY = jsonObject.LeftY;
-				var GestureDirection = jsonObject.GestureDirection;			
-				var RightXVel = jsonObject.RightXVel;
-				if (RightX!= null) {
-					document.getElementById("RightX").innerHTML = RightX.toPrecision(4);
-					document.getElementById("LeftX").innerHTML = LeftX.toPrecision(4);
-					document.getElementById("LeftY").innerHTML = LeftY.toPrecision(4);
-					document.getElementById("GestureDirection").innerHTML = GestureDirection;
-					document.getElementById("RightXVel").innerHTML = RightXVel.toPrecision(4);
-				}
-	
-				var rightHandY = jsonObject.rightHandY;
-				var headY = jsonObject.headY;
-
-				// if (GestureDirection != "down") {
-				// 	return;
-				// }	
-
-				var pentatonic = [0, 2, 4, 7, 9, 12];
-				var bendQuantoY = Math.round(LeftY/0.166);
-				var bendQuantoX = Math.round(LeftX);
-
-				var bendQuanto = bendQuantoY;
-
-				if (LeftY >= 0 && LeftY <=0.15) {
-					bendQuanto = 1;
-				}
-				else if (LeftY <= 0.3) {
-					bendQuanto = 2;
-				}
-				else if (LeftY <= 0.45) {
-					bendQuanto = 3;
-				}
-				else if (LeftY <= 0.6) {
-					bendQuanto = 4;
-				}
-				else if (LeftY <= 0.75) {
-					bendQuanto = 5;
-				}
-				else if (LeftY <= 0.9) {
-					bendQuanto = 6;
-				}
-				//
-
-
-				if (bendQuanto < 0 || bendQuanto > 6){
-					bendQuanto = 0;
-				}
-				
-				if (Date.now() - previousTime < 200) {
-					return;
-				}
-				else {
-					previousTime = Date.now();
-				}
-				if (running == 0) {
-					return;
-				}
-				var audio = null;
-
-					var audio = new Audio('smokec.wav');
-
-				if (bendQuanto == 6) {
-					// play bendquanto note
-					var audio = new Audio('smokea.wav');
-					//play a middle 'C' for the duration of an 8th note
-					// synth.triggerAttackRelease("G3", "8n");
-				player.queueWaveTable(audioContext, audioContext.destination
-					, _tone_0300_LesPaul_sf2, 0, 12*4+2, 1);
-
-				}
-				else if (bendQuanto == 5) {
-					var audio = new Audio('smokeb.wav');
-				player.queueWaveTable(audioContext, audioContext.destination
-					, _tone_0300_LesPaul_sf2, 0, 12*4+5, 1);
-					// synth.triggerAttackRelease("A3", "8n");
-				}
-				else if (bendQuanto == 4) {
-				player.queueWaveTable(audioContext, audioContext.destination
-					, _tone_0300_LesPaul_sf2, 0, 12*4+7, 1);
-					var audio = new Audio('smokec.wav');
-					// synth.triggerAttackRelease("B3", "8n");
-				}
-				else if (bendQuanto == 3) {
-				player.queueWaveTable(audioContext, audioContext.destination
-					, _tone_0300_LesPaul_sf2, 0, 12*4+8, 1);
-					var audio = new Audio('smoked.wav');
-					// synth.triggerAttackRelease("D4", "8n");
-				}
-				else if (bendQuanto == 2) {
-					// synth.triggerAttackRelease("E4", "8n");
-				}
-				else if (bendQuanto == 1) {
-					// synth.triggerAttackRelease("G4", "8n");
-				}
-
-				if (audio) {
-					// audio.play();
-				}
-
-
-
-				document.getElementById("bendQuanto").innerHTML = bendQuanto;				
-				 //Display the skeleton joints.
-	            }
-	            avatar.refreshHands(bendQuanto);
         }
     }
 
-    /**
-    * WebSocket onclose event.
-    */
-	// Connection closed.
+
     socket.onclose = function (event) {
 		console.log("Connection closed.");
 		
@@ -672,20 +237,22 @@ window.onload = function () {
             status.innerHTML = "Connection closed with message: " + reason + " (Code: " + code + ")";
         }
     }
-    /**
-    * WebSocket onerror event.
-    */
+
     socket.onerror = function (event) {
         status.innerHTML = "Error: " + event;
     }
-	/**
-    * Disconnect and close the connection.
-    */
+
     buttonStop.onclick = function (event) {
         if (socket.readyState == WebSocket.OPEN) {
             socket.close();
         }
     }
+
+    socket.onopen = function () {
+        status.innerHTML = "Connection successful.";
+        status.classList.add("text-success");
+		console.log("Connection successful.");
+    };
 	
 }
 		</script>
