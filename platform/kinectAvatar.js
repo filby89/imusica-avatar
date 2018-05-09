@@ -125,11 +125,6 @@ class kinectAvatar{
 		this.pantsMaterial = new THREE.MeshToonMaterial({color: 0x000000});
 		this.shirtMaterial =  new THREE.MeshBasicMaterial({color: 0xb70e4d});
 
-		this.quantoOneMaterial = new THREE.MeshBasicMaterial( {color: 0x3333cc} );
-		this.quantoTwoMaterial = new THREE.MeshBasicMaterial( {color: 0x009933} );
-		this.quantoThreeMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-		this.quantoFourMaterial = new THREE.MeshBasicMaterial( {color: 0xff0066} );
-		this.quantoFiveMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff} );
 		this.quantoNormal = new THREE.MeshNormalMaterial();
 	}
 
@@ -236,9 +231,9 @@ class kinectAvatar{
 		}
 
 		this.center = new THREE.Vector3(
-			(data.joints[this.inverseJointType["HipRight"]].x*this.scale*this.mirror+data.joints[this.inverseJointType["HipLeft"]].x*this.scale*this.mirror)/2, 
-			(data.joints[this.inverseJointType["HipRight"]].y*this.scale+data.joints[this.inverseJointType["HipLeft"]].y*this.scale)/2, 
-			(data.joints[this.inverseJointType["HipRight"]].z*this.scale+data.joints[this.inverseJointType["HipLeft"]].z*this.scale)/2);
+			data.joints[this.inverseJointType["SpineBase"]].x*this.scale*this.mirror, 
+			data.joints[this.inverseJointType["SpineBase"]].y*this.scale, 
+			data.joints[this.inverseJointType["SpineBase"]].z*this.scale);
 		//var pointY = new THREE.Vector3(data.joints[this.inverseJointType[jointEnd]].x*this.scale*this.mirror, data.joints[this.inverseJointType[jointEnd]].y*this.scale, data.joints[this.inverseJointType[jointEnd]].z*this.scale);
 	
 
@@ -463,26 +458,18 @@ class kinectAvatar{
 
 	}
 
-	refreshHands(bendQuanto) {
+	refreshHands(bendQuanto, num_segments) {
+    	var colors = [0xFFFA0D,0xE8760C,0xFF00A4,0x0C19E8,0x00FFB5, 0xA211E8, 0x0692FF, 0xFF3906];
+
 		var color, material;
-		if (bendQuanto == 1) { 
-			material = this.quantoOneMaterial;
-		}
-		else if (bendQuanto == 2){
-			material = this.quantoTwoMaterial;
-		}
-		else if (bendQuanto == 3){
-			material = this.quantoThreeMaterial;
-		}
-		else if (bendQuanto == 4){
-			material = this.quantoFourMaterial;
-		}
-		else if (bendQuanto == 5){
-			material = this.quantoFiveMaterial;
-		}
-		else {
+
+		if (bendQuanto < 0 || bendQuanto > num_segments) {
 			material = this.quantoNormal;
 		}
+		else {
+			material = new THREE.MeshBasicMaterial( {color: colors[bendQuanto-1]} );
+		}
+		console.log(bendQuanto);
 		if (this.handLeft != null) {
 			this.handLeft.material = material;
 			material.needsUpdate = true;

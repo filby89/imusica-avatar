@@ -215,12 +215,12 @@ namespace KinectCoordinateMapping
                 {
                     bool gotBody = false;
                     int idx = 0; // index for scale position
-                    //canvas.Children.Clear();
+                    // canvas.Children.Clear();
 
                     _bodies = new Body[frame.BodyFrameSource.BodyCount];
                     frame.GetAndRefreshBodyData(_bodies);
 
-                    Console.WriteLine("Reading Bodies");
+                    // Console.WriteLine("Reading Bodies");
                     foreach (var body in _bodies)
                     {
 

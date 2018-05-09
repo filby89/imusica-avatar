@@ -90,6 +90,8 @@ class PitchVolumeOrgan {
             var B4 = [71];
             var note = [];
 
+            var X_notes = [48,50,52,53,55,57,59];
+
             switch(LHbin) {
                 case 1:
                     note = C4;
@@ -113,60 +115,36 @@ class PitchVolumeOrgan {
                     note = B4;
                     break;
             } 
-            var Rnote = [];
-            switch(RHbin) {
-                case 1:
-                    Rnote = C4;
-                    break;
-                case 2:
-                    Rnote = D4;
-                    break;
-                case 3:
-                    Rnote = E4;
-                    break;
-                case 4:
-                    Rnote = F4;
-                    break;
-                case 5:
-                    Rnote = G4
-                    break;
-                case 6:
-                    Rnote = A4;
-                    break;
-                case 7:
-                    Rnote = B4;
-                    break;
-
-            } 
+            var Rnote = X_notes[RHbin-1];
 
 
-                        // var D4 = [50-12,57-12,62-12,67-12];
-                        // var F4 = [53,36,28,45,41,36];
-                        // var G4 = [31,35,55,47,43,38];
+                  // var D4 = [50-12,57-12,62-12,67-12];
+                  // var F4 = [53,36,28,45,41,36];
+                  // var G4 = [31,35,55,47,43,38];
 
-                        // var D4 = [54,50,45,38];
-                        // var F4 = [53,48,45,41,36,30];
-                        // var G4 = [55,47,43,38,35,31];
-                        // var Gs4 = [56,51,48,44,39,32];
+                  // var D4 = [54,50,45,38];
+                  // var F4 = [53,48,45,41,36,30];
+                  // var G4 = [55,47,43,38,35,31];
+                  // var Gs4 = [56,51,48,44,39,32];
 
-                  var duration = 10;
+            var duration = 10;
 
-                  if (note.length > 0 && note[0] != this.previousNoteL[0])  {
-                        console.log(this.player.envelopes)//.envelopes[0].cancel();
-                        for (var i=0;i<this.player.envelopes.length;i++) {
-                          this.player.envelopes[i].cancel();
-                        }
-                        this.player.queueChord(this.audioContext, this.audioContext.destination
-                              , _tone_0300_LesPaul_sf2, 0, note, duration, LHbinVol*0.1);
+            if (note.length > 0 && note[0] != this.previousNoteL[0])  {
+                  console.log(this.player.envelopes)//.envelopes[0].cancel();
+                  for (var i=0;i<this.player.envelopes.length;i++) {
+                    this.player.envelopes[i].cancel();
                   }
-                  if (Rnote.length > 0 && this.previousNoteR[0] != Rnote[0]) {
-                        for (var i=0;i<this.player2.envelopes.length;i++) {
-                          this.player2.envelopes[i].cancel();
-                        }
-                        this.player2.queueChord(this.audioContext, this.audioContext.destination
-                              , _tone_0130_FluidR3_GM_sf2_file, 0, Rnote, duration, RHbinVol*0.1);
+                  this.player.queueChord(this.audioContext, this.audioContext.destination
+                        , _tone_0300_LesPaul_sf2, 0, note, duration, LHbinVol*0.1);
+            }
+            if (Rnote.length > 0 && this.previousNoteR[0] != Rnote[0]) {
+                  for (var i=0;i<this.player2.envelopes.length;i++) {
+                    this.player2.envelopes[i].cancel();
                   }
-                  this.previousNoteL = note;
-                  this.previousNoteR = Rnote;
-      }
+                  this.player2.queueChord(this.audioContext, this.audioContext.destination
+                        , _tone_0130_FluidR3_GM_sf2_file, 0, Rnote, duration, RHbinVol*0.1);
+            }
+            this.previousNoteL = note;
+            this.previousNoteR = Rnote;
+  }
 }
