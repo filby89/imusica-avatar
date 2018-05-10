@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8" />
@@ -32,12 +32,14 @@
 	        <option value="1">Air Guitar</option>
 	        <option value="2">Cello</option>
 	        <option value="3">Double Instrument</option>
+      <option value="4"> Two Player Operation</option>
   </select>
 </div>
         <button type="button" id="start-button"  class="btn btn-primary">Start Mode</button>
 
 			<table class="table">
 			  <tbody>
+                  <tr><td>Running:</td> <td id="running"></td></tr>
 				<tr><td>RH x position:</td> <td id="HR_x"></td> </tr>
 				<tr><td>RH y position:</td> <td id="HR_y"></td> </tr> 
 				<tr><td>RH z position:</td> <td id="HR_z"></td> </tr> 
@@ -94,14 +96,20 @@ window.onload = function () {
 	var status = document.getElementById("status");
 	var running = 0;
 
-
+    //World and avatar initialization.
 	 var world = new interactionWorld(document.getElementById("world"));
 	 world.init();
 	 var avatar = new kinectAvatar(world,1,false);
-	 avatar.addToScene(world.scene);
-	 var pitchVolumeOrgan = new PitchVolumeOrgan(); 
+	 //avatar.addToScene(world.scene); //right-of-cam avatar
+	 var avatar2 = new kinectAvatar(world, 1, false);
+	 //avatar2.addToScene(world.scene); //left-of-cam avatar
+	 var pitchVolumeOrgan = new PitchVolumeOrgan();
+
+    //each avatar gets potentially assigned a guitar and a cello.
 	 var airCello = new AirCello(world, avatar); 
-	 var airGuitar = new AirGuitar(world, avatar); 
+	 var airGuitar = new AirGuitar(world, avatar);
+	 var airCello2 = new AirCello(world, avatar2); 
+	 var airGuitar2 = new AirGuitar(world,avatar2);
 
 
 	if (!window.WebSocket) {
@@ -123,7 +131,7 @@ window.onload = function () {
     var mode = 0;
   	var buttonSwitchMode = $("#start-button");	
 
-    buttonSwitchMode.click(function(){
+  	buttonSwitchMode.click(function () { //does this only activate on start/stop clicking?
     	if (mode > 0) {
     		buttonSwitchMode.addClass("btn-primary");
     		buttonSwitchMode.removeClass("btn-warning");
@@ -134,21 +142,42 @@ window.onload = function () {
     		buttonSwitchMode.addClass("btn-warning");
     		buttonSwitchMode.removeClass("btn-primary");
     		buttonSwitchMode.html("Stop");
-	    	mode = parseInt($("#mode").val());    		
+    		mode = parseInt($("#mode").val());
+    		avatar.removeFromScene(world.scene);
+    		avatar2.removeFromScene(world.scene);
     	}
 
     	if (mode == 1) {
-    		airGuitar.add_to_world();
+    	    airGuitar.add_to_world(); //add_to_world does not now create a picture, but it merely denotes that the object is possibly active
+    	        airGuitar2.add_to_world();
     	}
     	else {
-    		airGuitar.remove_from_world();
+    	    if (mode != 4)
+    	        airGuitar.remove_from_world();
+    	    airGuitar2.remove_from_world();
     	}
 
     	if (mode == 2) {
-    		airCello.add_to_world();
+    	    airCello.add_to_world();
+    	    airCello2.add_to_world();
     	}
     	else {
-    		airCello.remove_from_world();
+    	    airCello.remove_from_world();
+    	    if (mode != 4)
+    	        airCello2.remove_from_world();
+    	}
+    	if (mode == 3)
+        	    console.log("...");
+    	if (mode == 4) //Guitar-Cello mode. Avatar->guitar, avatar2->cello.
+    	{
+    	    airGuitar.add_to_world();
+            airCello2.add_to_world();
+    	}
+    	else{
+    	    if (mode != 1)
+    	        airGuitar.remove_from_world();
+            if (mode != 2)
+    	        airCello2.remove_from_world();
     	}
 
     });
@@ -158,6 +187,7 @@ window.onload = function () {
 			// Create a JSON object.
             var jsonObject = JSON.parse(event.data);
 
+            //Case 1: A dynamic gesture event (currently only a start event) is received.
 			if (jsonObject.gesture) {
 				if (jsonObject.gesture == "start") {
 					running = 1;
@@ -165,59 +195,109 @@ window.onload = function () {
 				}
 			}
 
-            if (jsonObject.skeletons) {
-				if (rightHandY > headY + 0.2) {
-		            var data = jsonObject.skeletons[0];
+            //Case 2: A bunch of skeletal data has been received.
+			if (jsonObject.skeletons) {
+			    for (var i = 0; i < jsonObject.skeletons.length; i++)
+			    {
+                    var data = jsonObject.skeletons[i]; 
 					var rightHandY = data.joints[11].y;
 					var headY = data.joints[3].y;
-
-					running = 0;
-					console.log("Stopping");
+					if (rightHandY > headY + 0.2)
+					{
+					    running = 0;
+					    console.log("Stopping");
+					}
 				}
 			}
 
+            //trial for showing correct no. of avatars dep. on mode.
+			if (jsonObject.skeletons)
+			{
+			    if (mode == 4) //Display two avatars
+			    {
+			        avatar.addToScene(world.scene);
+			        avatar2.addToScene(world.scene);
+			    }
+			    else if (mode != 0) //Display the appropriate avatar
+			    {
+			        if (jsonObject.skeletons[0].joints[0].x > 0) {
+			            avatar2.addToScene(world.scene);
+			            avatar.removeFromScene(world.scene);
+			        }
+			        else {
+			            avatar.addToScene(world.scene);
+			            avatar2.removeFromScene(world.scene);
+			        }
+			    }
+			    else //Display zero avatars.
+			    {
+			        avatar.removeFromScene(world.scene);
+			        avatar2.removeFromScene(world.scene);
+			    }
+			}
+            //isn't this an "else" ? [still case 2 btw]
             if (jsonObject.skeletons) {
-	            avatar.refresh(jsonObject.skeletons[0]);
+                // refresh html elements [regardless of start/stop, this only refreshes the screen]
+                for (var i = 0; i < jsonObject.skeletons.length; i++) {
+                    var pos = jsonObject.skeletons[i].pid; //denoting right/left of cam 
+                    if ((pos == 0) && avatar.active) {
+                        avatar.refresh(jsonObject.skeletons[i]);
+                        airGuitar.refreshGuitar(jsonObject.skeletons[i].joints[0]); //refresh is now responsible for initializing the image
+                        airCello.refreshCello(jsonObject.skeletons[i].joints[0]);
+                    }
+                    else if ((pos == 1) && avatar2.active) {
+                        avatar2.refresh(jsonObject.skeletons[i]);
+                        airGuitar2.refreshGuitar(jsonObject.skeletons[i].joints[0]);
+                        airCello2.refreshCello(jsonObject.skeletons[i].joints[0]);
+                    }
 
+                    for (var j = 0; j < jsonObject.skeletons[i].joints.length; j++) {
+                        var joint = jsonObject.skeletons[i].joints[j];
 
-				// refresh html elements
-	             for (var i = 0; i < jsonObject.skeletons.length; i++) {	
-						for (var j = 0; j < jsonObject.skeletons[i].joints.length; j++) {
-						var joint = jsonObject.skeletons[i].joints[j];
-							
-						if (joint.name == "HandRight") {
-							var HL_x = joint.x;
-							document.getElementById("HR_x").innerHTML = HL_x.toPrecision(4);
-							var HL_y = joint.y;
-							document.getElementById("HR_y").innerHTML = HL_y.toPrecision(4);
-							var HL_z = joint.z;
-							document.getElementById("HR_z").innerHTML = HL_z.toPrecision(4);
-						}
-						else if (joint.name == "HandLeft") {
-							var HL_x = joint.x;
-							document.getElementById("HL_x").innerHTML = HL_x.toPrecision(4);
-							var HL_y = joint.y;
-							document.getElementById("HL_y").innerHTML = HL_y.toPrecision(4);
-							var HL_z = joint.z;
-							document.getElementById("HL_z").innerHTML = HL_z.toPrecision(4);
+                        if (joint.name == "HandRight") {
+                            var HL_x = joint.x;
+                            document.getElementById("HR_x").innerHTML = HL_x.toPrecision(4);
+                            var HL_y = joint.y;
+                            document.getElementById("HR_y").innerHTML = HL_y.toPrecision(4);
+                            var HL_z = joint.z;
+                            document.getElementById("HR_z").innerHTML = HL_z.toPrecision(4);
+                        }
+                        else if (joint.name == "HandLeft") {
+                            var HL_x = joint.x;
+                            document.getElementById("HL_x").innerHTML = HL_x.toPrecision(4);
+                            var HL_y = joint.y;
+                            document.getElementById("HL_y").innerHTML = HL_y.toPrecision(4);
+                            var HL_z = joint.z;
+                            document.getElementById("HL_z").innerHTML = HL_z.toPrecision(4);
 
-						}										
-	                }
-	            }
+                        }
+                    }
+                    // play sound
 
-	            // play sound
-
-	            if (running || true) {
-					if (mode == 1) { 
-						airGuitar.refresh(jsonObject.skeletons[0]);
-					}
-					if (mode == 2) { 
-						airCello.refresh(jsonObject.skeletons[0]);
-					}
-					else if (mode == 3) {
-		            	pitchVolumeOrgan.refresh(jsonObject.skeletons[0]);					
-					}	            	
-	            }
+                    if (running || true) { //always?
+                        if (mode == 1) {
+                            if (pos == 0 && avatar.active)
+                                airGuitar.refresh(jsonObject.skeletons[i]);
+                            else if (pos == 1 && avatar2.active)
+                                airGuitar2.refresh(jsonObject.skeletons[i]);
+                        }
+                        if (mode == 2) {
+                            if (pos == 0 && avatar.active)
+                                airCello.refresh(jsonObject.skeletons[i]);
+                            else if (pos == 1 && avatar2.active)
+                                airCello2.refresh(jsonObject.skeletons[i]);
+                        }
+                        else if (mode == 3) { //ignored for the time being.
+                            pitchVolumeOrgan.refresh(jsonObject.skeletons[0]);
+                        }
+                        else if (mode == 4) {
+                            if (pos == 0) //no avatar check, in this mode both are activated
+                                airGuitar.refresh(jsonObject.skeletons[i]);
+                            else
+                                airCello2.refresh(jsonObject.skeletons[i]);
+                        }
+                    }
+                }
 
 	        }    
         }
