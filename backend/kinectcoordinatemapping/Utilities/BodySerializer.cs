@@ -33,6 +33,9 @@ namespace KinectCoordinateMapping
             [DataMember(Name = "id")]
             public string ID { get; set; }
 
+            [DataMember(Name = "pid")]
+            public int pID { get; set; }
+
             [DataMember(Name = "joints")]
             public List<JSONJoint> Joints { get; set; }
         }
@@ -69,16 +72,17 @@ namespace KinectCoordinateMapping
                 JSONSkeleton jsonSkeleton = new JSONSkeleton
                 {
                     ID = skeleton.TrackingId.ToString(),
+                    pID = Convert.ToInt32(skeleton.Joints[0].Position.X > 0), //SpineBase right or left of cam.
                     Joints = new List<JSONJoint>()
                 };
 
                 foreach (Joint joint in skeleton.Joints.Values)
-                {                        
+                {
                     //Joint currentJoint = new Joint();
                     /*if (joint.JointType != JointType.Head && joint.JointType != JointType.Neck && joint.JointType != JointType.SpineBase
                         && joint.JointType != JointType.SpineMid && joint.JointType != JointType.SpineShoulder
                         && joint.JointType != JointType.HandRight && joint.JointType != JointType.HandLeft)*/
-                    
+
                     //use if only need to send those joints
                     //if (joint.JointType != JointType.Neck && joint.JointType != JointType.SpineBase
                     //      && joint.JointType != JointType.HandRight && joint.JointType != JointType.HandLeft)
@@ -107,6 +111,7 @@ namespace KinectCoordinateMapping
                         default:
                             break;
                     }
+
 
                     jsonSkeleton.Joints.Add(new JSONJoint
                     {
