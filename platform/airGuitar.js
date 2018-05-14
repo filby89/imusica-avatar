@@ -41,12 +41,21 @@ class AirGuitar {
     this.inverseJointType = swap(this.JointType);
 
     this.world = world;
-
-    this.createGuitar();
+    this.inWorld = false;
     this.createSoundSource();
+    this.appeared = false;
     this.previousTime = Date.now();
     this.refreshTime = 200;
     this.previousUp = false;
+	    //moved loading to the constructor.
+    var img = new THREE.MeshBasicMaterial({ //CHANGED to MeshBasicMaterial
+        map:THREE.ImageUtils.loadTexture('guitar_2.png'),
+        transparent: true,
+        opacity: 0.8
+    });
+    img.crossOrigin = "anonymous";
+    img.map.needsUpdate = true; //ADDED
+    this.guitar = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 1.5),img);
   }
 
   createSoundSource() {
@@ -57,28 +66,27 @@ class AirGuitar {
               this.player.loader.decodeAfterLoading(this.audioContext, '_tone_0300_LesPaul_sf2');
   }
 
-  createGuitar() {
-              var img = new THREE.MeshBasicMaterial({ //CHANGED to MeshBasicMaterial
-                  map:THREE.ImageUtils.loadTexture('guitar_2.png'),
-                  transparent: true,
-                  opacity: 0.8
-              });
-              img.crossOrigin = "anonymous";
+    //needs either a refreshGuitar method or some either/or dep. on whether the object has been initialized.
+  refreshGuitar(data) {
+      if (this.inWorld)
+      {
+          if (!this.appeared)
+         {
+              this.world.scene.add(this.guitar);
+              this.appeared = true;
+          }
 
-              img.map.needsUpdate = true; //ADDED
-
-              // plane
-              this.guitar = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 1.5),img);
-              this.guitar.rotation.y = Math.PI;
-              this.guitar.position.x = 0.2;
-              this.guitar.position.z = -0.1;
-              this.guitar.overdraw = true;
-
+          //in any case...
+          this.guitar.rotation.y = Math.PI;
+          this.guitar.position.x = data.x;
+          this.guitar.position.z = data.z - 1.8;
+          this.guitar.overdraw = true;
+      }
   }
+
   
   add_to_world() {
     if (!this.inWorld) {
-      this.world.scene.add(this.guitar);
       this.inWorld = true;      
     }
   }
@@ -87,6 +95,7 @@ class AirGuitar {
     if (this.inWorld) {
       this.world.scene.remove(this.guitar);
       this.inWorld = false;      
+      this.appeared = false;
     }
   }
   

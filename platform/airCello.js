@@ -40,16 +40,26 @@ class AirCello {
 
     this.inverseJointType = swap(this.JointType);
 
-    this.createCello();
     this.createSoundSource();
+    this.appeared = false; //flag to denote the first time after creation of the object
     this.previousTime = Date.now();
     this.refreshTime = 200;
     this.previousLeft = false;
     this.world = world;
-
+    this.inWorld = false;
+    this.colored  =false; //similarly, for the colorline creator.
     this.currentNote = null;
 
     this.previousX = 0;
+
+    var img = new THREE.MeshBasicMaterial({ //CHANGED to MeshBasicMaterial
+        map:THREE.ImageUtils.loadTexture('Cello.png'),
+        transparent: true,
+        opacity: 0.8
+    });
+    img.crossOrigin = "anonymous";
+    img.map.needsUpdate = true; //ADDED
+    this.cello = new THREE.Mesh(new THREE.PlaneGeometry(2, 2),img);
   }
 
   createSoundSource() {
@@ -60,30 +70,26 @@ class AirCello {
               this.player.loader.decodeAfterLoading(this.audioContext, '0430_SBLive_sf2');
   }
 
-  createCello() {
-              var img = new THREE.MeshBasicMaterial({ //CHANGED to MeshBasicMaterial
-                  map:THREE.ImageUtils.loadTexture('Cello.png'),
-                  transparent: true,
-                  opacity: 0.8
-              });
-              img.crossOrigin = "anonymous";
+  refreshCello(data) {
+      if (this.inWorld)
+      {
+          if (!this.appeared)
+          {
+              this.world.scene.add(this.cello);
+              this.appeared = true;
+          }
+          // plane
+          this.cello.rotation.y = Math.PI;
+          this.cello.position.x = data.x - 0.2;
+          this.cello.position.z = data.z - 1.8;
+          this.cello.overdraw = true;
 
-              img.map.needsUpdate = true; //ADDED
-
-              // plane
-              this.cello = new THREE.Mesh(new THREE.PlaneGeometry(2, 2),img);
-              this.cello.rotation.y = Math.PI;
-              this.cello.position.x = -0.2;
-              this.cello.position.z = 0.2;
-              this.cello.overdraw = true;
-
-      this.direction = 0;
-
+          this.direction = 0;
+      }
   }
   
   add_to_world() {
     if (!this.inWorld) {
-      this.world.scene.add(this.cello);
       this.inWorld = true;      
     }
   }
@@ -91,7 +97,11 @@ class AirCello {
   remove_from_world() {
     if (this.inWorld) {
       this.world.scene.remove(this.cello);
-      this.inWorld = false;      
+      this.inWorld = false;  
+      this.appeared = false;
+      this.colored = false;
+      for (var i = 0; i< 8; i++)
+        this.world.scene.remove(this.colorLines[i]);
     }
   }
   
@@ -116,14 +126,12 @@ class AirCello {
 
       var play = false;
       
-
       this.createColorLine(data);
-
       var velocity_x = xRH3DPos - this.previousX;
       this.previousX = xRH3DPos;
       document.getElementById("GestureDirection").innerHTML = velocity_x.toPrecision(4);
 
-      if (Math.abs(velocity_x) > 0.001) {
+      if (Math.abs(velocity_x) > 0.001) { //xamilo dn einai? apo oti thymamai apo diplo at least
         if (this.direction == Math.sign(velocity_x)) {
           play = false;
         }
@@ -232,34 +240,51 @@ class AirCello {
     var colors = [0xFFFA0D,0xE8760C,0xFF00A4,0x0C19E8,0x00FFB5, 0xA211E8, 0x0692FF, 0xFF3906];
     var notes = ["A", "B", "C", "D", "E", "F", "G", "A"];
 
+   // if (!this.colorLines)
+    //    this.world.scene.remove(this.colorLines[i]);
+    //else
+     //   this.colorLines = [];
+    if (!this.colored)
+    {
+        this.colorLines = [];
+        this.colored = true;
+        for (i=0;i<8;i++) {
+            // add box
+            var material = new THREE.MeshBasicMaterial( {transparent: true, opacity: 0.7, color: colors[i]} );
+            this.colorLines.push(new THREE.Mesh( geometry, material));
+            this.colorLines[i].position.x = data.joints[this.inverseJointType["SpineBase"]].x-0.2;
+            this.colorLines[i].position.z = data.joints[this.inverseJointType["SpineBase"]].z-1.8;
+            //this.colorLines[i].position.x = -0.2;
+            //this.colorLines[i].position.z = 0.2;
+            this.colorLines[i].position.y = i*cube_height + cube_height/2;
+            this.world.scene.add(this.colorLines[i]);
+            // add note
 
-    if (!this.colorLines) {
-      this.colorLines = [];
-  
-      for (i=0;i<8;i++) {
-        // add box
-        var material = new THREE.MeshBasicMaterial( {transparent: true, opacity: 0.7, color: colors[i]} );
-        this.colorLines.push(new THREE.Mesh( geometry, material));
-        this.colorLines[i].position.x = -0.2;
-        this.colorLines[i].position.z = 0.2;
-        this.colorLines[i].position.y = i*cube_height + cube_height/2;
-        this.world.scene.add(this.colorLines[i]);
-        // add note
+            // var line_material = new THREE.LineBasicMaterial({
+            //   color: 0x0000ff
+            // });
 
-        // var line_material = new THREE.LineBasicMaterial({
-        //   color: 0x0000ff
-        // });
+            // var line_geometry = new THREE.Geometry();
+            // line_geometry.vertices.push(
+            //   new THREE.Vector3( -0.2, 0, 0.1 ),
+            //   new THREE.Vector3( -0.2, cube_height, 0.1 )
+            // );
 
-        // var line_geometry = new THREE.Geometry();
-        // line_geometry.vertices.push(
-        //   new THREE.Vector3( -0.2, 0, 0.1 ),
-        //   new THREE.Vector3( -0.2, cube_height, 0.1 )
-        // );
+            // var line = new THREE.Line( line_geometry, line_material );
+            // this.world.scene.add( line )
 
-        // var line = new THREE.Line( line_geometry, line_material );
-        // this.world.scene.add( line )
-
-      }
+            // }
+        }
+    }
+    else{
+        for(var i = 0; i < 8; i++)
+        {
+            this.colorLines[i].position.x = data.joints[this.inverseJointType["SpineBase"]].x-0.2;
+            this.colorLines[i].position.z = data.joints[this.inverseJointType["SpineBase"]].z-1.8;
+            //this.colorLines[i].position.x = -0.2;
+            //this.colorLines[i].position.z = 0.2;
+            this.colorLines[i].position.y = i*cube_height + cube_height/2;
+        }
     }
 
     var loader = new THREE.FontLoader();
