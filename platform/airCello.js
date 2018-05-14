@@ -74,7 +74,7 @@ class AirCello {
               this.cello = new THREE.Mesh(new THREE.PlaneGeometry(2, 2),img);
               this.cello.rotation.y = Math.PI;
               this.cello.position.x = -0.2;
-              this.cello.position.z = 0.2;
+              this.cello.position.z = 0;
               this.cello.overdraw = true;
 
       this.direction = 0;
@@ -241,7 +241,7 @@ class AirCello {
         var material = new THREE.MeshBasicMaterial( {transparent: true, opacity: 0.7, color: colors[i]} );
         this.colorLines.push(new THREE.Mesh( geometry, material));
         this.colorLines[i].position.x = -0.2;
-        this.colorLines[i].position.z = 0.2;
+        this.colorLines[i].position.z = -0.1;
         this.colorLines[i].position.y = i*cube_height + cube_height/2;
         this.world.scene.add(this.colorLines[i]);
         // add note
@@ -279,9 +279,9 @@ class AirCello {
           var text = new THREE.Mesh(textGeometry,  new THREE.MeshBasicMaterial( {color: 0x000000} ));
           text.scale.x = -1;
           text.position.x = -0.17;
-          text.position.z = 0.1;
-          text.position.y = cube_height*i-0.03;
-          // that.world.scene.add(text);
+          text.position.z = -0.2;
+          text.position.y = cube_height*i+0.02;
+          that.world.scene.add(text);
         }        
       }
 

@@ -59,7 +59,7 @@ class AirGuitar {
 
   createGuitar() {
               var img = new THREE.MeshBasicMaterial({ //CHANGED to MeshBasicMaterial
-                  map:THREE.ImageUtils.loadTexture('guitar_2.png'),
+                  map:THREE.ImageUtils.loadTexture('guitar_3.png'),
                   transparent: true,
                   opacity: 0.8
               });
@@ -68,11 +68,107 @@ class AirGuitar {
               img.map.needsUpdate = true; //ADDED
 
               // plane
-              this.guitar = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 1.5),img);
-              this.guitar.rotation.y = Math.PI;
-              this.guitar.position.x = 0.2;
+              this.guitar = new THREE.Mesh(new THREE.PlaneGeometry(3, 2),img);
+              this.guitar.rotation.x = Math.PI;
+              this.guitar.rotation.z = Math.PI;
+              this.guitar.position.x = -0.1;
               this.guitar.position.z = -0.1;
+              this.guitar.position.y = 0.05;
               this.guitar.overdraw = true;
+
+        // var line_material = new THREE.LineBasicMaterial({
+        //   color: 0xff0000
+        // });
+
+        // var line_geometry = new THREE.Geometry();
+        // var angle = 34*Math.PI/180;
+        // var length = 0.65;
+        // line_geometry.vertices.push(
+        //   new THREE.Vector3( 0, 0, -0.1 ),
+        //   new THREE.Vector3( 0+length*Math.cos(angle), 0+length*Math.sin(angle), -0.1 )
+        // );
+
+        // var line = new THREE.Line( line_geometry, line_material );
+        // this.world.scene.add( line )
+        this.createColorLine()
+  }
+
+  createColorLine() {
+    var num_segments = 5;
+
+    var max_dist = 0.6;
+
+    var cube_height = max_dist/num_segments;
+    var cube_depth = 0.1;
+    var cube_length = 0.045;
+
+    var i = 0;
+
+    var geometry = new THREE.BoxGeometry( cube_length, cube_height, cube_depth );
+
+    var colors = [0xFFFA0D,0xE8760C,0xFF00A4,0x0C19E8,0x00FFB5, 0xA211E8, 0x0692FF, 0xFF3906];
+    var notes = ["A", "B", "C", "D", "E", "F", "G", "A"];
+
+    var group = new THREE.Group();
+
+    if (!this.colorLines) {
+      this.colorLines = [];
+  
+      for (i=0;i<num_segments;i++) {
+        // add box
+        var material = new THREE.MeshBasicMaterial( {transparent: true, opacity: 0.7, color: colors[i]} );
+        this.colorLines.push(new THREE.Mesh( geometry, material));
+        this.colorLines[i].position.x = -0.04;
+        this.colorLines[i].position.z = -0.1;
+        this.colorLines[i].position.y = i*cube_height + cube_height/2;
+        group.add(this.colorLines[i]);
+        // add note
+
+        // var line_material = new THREE.LineBasicMaterial({
+        //   color: 0x0000ff
+        // });
+
+        // var line_geometry = new THREE.Geometry();
+        // line_geometry.vertices.push(
+        //   new THREE.Vector3( -0.2, 0, 0.1 ),
+        //   new THREE.Vector3( -0.2, cube_height, 0.1 )
+        // );
+
+        // var line = new THREE.Line( line_geometry, line_material );
+        // this.world.scene.add( line )
+
+      }
+    }
+    group.rotation.z = 56*Math.PI/180;
+    this.world.scene.add(group);
+
+
+    var loader = new THREE.FontLoader();
+
+    var that = this;
+
+    loader.load('helvetiker_regular.typeface.json', function (font) {
+      if (!that.notes) {
+        that.notes = 5;
+        for (i=0;i<num_segments;i++) {
+
+          var textGeometry = new THREE.TextGeometry( notes[i], {
+            font: font,
+            size: 0.04,
+            height: 0.04
+          } );
+          var text = new THREE.Mesh(textGeometry,  new THREE.MeshBasicMaterial( {color: 0x000000} ));
+          text.scale.x = -1;
+          text.position.x = -0.17;
+          text.position.z = -0.2;
+          text.position.y = cube_height*i+0.02;
+          that.world.scene.add(text);
+        }        
+      }
+
+    });
+
+
 
   }
   
