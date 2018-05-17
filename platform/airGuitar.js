@@ -1,7 +1,7 @@
 class AirGuitar {
-	constructor(world, avatar) {
+	constructor(world, avatar, modalysChannel, sessionId) {
     this.avatar = avatar;        
-
+    this.sessionId = sessionId;
     this.JointType = Object.freeze({
       0: 'SpineBase',
       1: 'SpineMid',
@@ -41,12 +41,30 @@ class AirGuitar {
     this.inverseJointType = swap(this.JointType);
 
     this.world = world;
-
-    this.createGuitar();
+    this.inWorld = false;
     this.createSoundSource();
+    this.appeared = false;
     this.previousTime = Date.now();
     this.refreshTime = 200;
     this.previousUp = false;
+	    //moved loading to the constructor.
+    var img = new THREE.MeshBasicMaterial({ //CHANGED to MeshBasicMaterial
+        map:THREE.ImageUtils.loadTexture('guitar_2.png'),
+        transparent: true,
+        opacity: 0.8
+    });
+    img.crossOrigin = "anonymous";
+    img.map.needsUpdate = true; //ADDED
+    this.guitar = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 1.5),img);
+    this.modalysChannel = modalysChannel;
+    this.sessionId = sessionId;
+    this.value = [];
+    for (var i = 0; i < 6; i++) //6: num of guitar strings
+    {
+        this.value[i] = 0.5; //0.5 before being plucked up, -0.5 before being plucked down.
+    }
+    console.log(this.modalysChannel);
+    console.log(sessionId);
   }
 
   createSoundSource() {
@@ -57,124 +75,27 @@ class AirGuitar {
               this.player.loader.decodeAfterLoading(this.audioContext, '_tone_0300_LesPaul_sf2');
   }
 
-  createGuitar() {
-              var img = new THREE.MeshBasicMaterial({ //CHANGED to MeshBasicMaterial
-                  map:THREE.ImageUtils.loadTexture('guitar_3.png'),
-                  transparent: true,
-                  opacity: 0.8
-              });
-              img.crossOrigin = "anonymous";
+    //needs either a refreshGuitar method or some either/or dep. on whether the object has been initialized.
+  refreshGuitar(data) {
+      if (this.inWorld)
+      {
+          if (!this.appeared)
+         {
+              this.world.scene.add(this.guitar);
+              this.appeared = true;
+          }
 
-              img.map.needsUpdate = true; //ADDED
-
-              // plane
-              this.guitar = new THREE.Mesh(new THREE.PlaneGeometry(3, 2),img);
-              this.guitar.rotation.x = Math.PI;
-              this.guitar.rotation.z = Math.PI;
-              this.guitar.position.x = -0.1;
-              this.guitar.position.z = -0.1;
-              this.guitar.position.y = 0.05;
-              this.guitar.overdraw = true;
-
-        // var line_material = new THREE.LineBasicMaterial({
-        //   color: 0xff0000
-        // });
-
-        // var line_geometry = new THREE.Geometry();
-        // var angle = 34*Math.PI/180;
-        // var length = 0.65;
-        // line_geometry.vertices.push(
-        //   new THREE.Vector3( 0, 0, -0.1 ),
-        //   new THREE.Vector3( 0+length*Math.cos(angle), 0+length*Math.sin(angle), -0.1 )
-        // );
-
-        // var line = new THREE.Line( line_geometry, line_material );
-        // this.world.scene.add( line )
-        this.createColorLine()
+          //in any case...
+          this.guitar.rotation.y = Math.PI;
+          this.guitar.position.x = data.x;
+          this.guitar.position.z = data.z - 1.8;
+          this.guitar.overdraw = true;
+      }
   }
 
-  createColorLine() {
-    var num_segments = 5;
-
-    var max_dist = 0.6;
-
-    var cube_height = max_dist/num_segments;
-    var cube_depth = 0.1;
-    var cube_length = 0.045;
-
-    var i = 0;
-
-    var geometry = new THREE.BoxGeometry( cube_length, cube_height, cube_depth );
-
-    var colors = [0xFFFA0D,0xE8760C,0xFF00A4,0x0C19E8,0x00FFB5, 0xA211E8, 0x0692FF, 0xFF3906];
-    var notes = ["A", "B", "C", "D", "E", "F", "G", "A"];
-
-    var group = new THREE.Group();
-
-    if (!this.colorLines) {
-      this.colorLines = [];
-  
-      for (i=0;i<num_segments;i++) {
-        // add box
-        var material = new THREE.MeshBasicMaterial( {transparent: true, opacity: 0.7, color: colors[i]} );
-        this.colorLines.push(new THREE.Mesh( geometry, material));
-        this.colorLines[i].position.x = -0.04;
-        this.colorLines[i].position.z = -0.1;
-        this.colorLines[i].position.y = i*cube_height + cube_height/2;
-        group.add(this.colorLines[i]);
-        // add note
-
-        // var line_material = new THREE.LineBasicMaterial({
-        //   color: 0x0000ff
-        // });
-
-        // var line_geometry = new THREE.Geometry();
-        // line_geometry.vertices.push(
-        //   new THREE.Vector3( -0.2, 0, 0.1 ),
-        //   new THREE.Vector3( -0.2, cube_height, 0.1 )
-        // );
-
-        // var line = new THREE.Line( line_geometry, line_material );
-        // this.world.scene.add( line )
-
-      }
-    }
-    group.rotation.z = 56*Math.PI/180;
-    this.world.scene.add(group);
-
-
-    var loader = new THREE.FontLoader();
-
-    var that = this;
-
-    loader.load('helvetiker_regular.typeface.json', function (font) {
-      if (!that.notes) {
-        that.notes = 5;
-        for (i=0;i<num_segments;i++) {
-
-          var textGeometry = new THREE.TextGeometry( notes[i], {
-            font: font,
-            size: 0.04,
-            height: 0.04
-          } );
-          var text = new THREE.Mesh(textGeometry,  new THREE.MeshBasicMaterial( {color: 0x000000} ));
-          text.scale.x = -1;
-          text.position.x = -0.17;
-          text.position.z = -0.2;
-          text.position.y = cube_height*i+0.02;
-          that.world.scene.add(text);
-        }        
-      }
-
-    });
-
-
-
-  }
   
   add_to_world() {
     if (!this.inWorld) {
-      this.world.scene.add(this.guitar);
       this.inWorld = true;      
     }
   }
@@ -183,6 +104,7 @@ class AirGuitar {
     if (this.inWorld) {
       this.world.scene.remove(this.guitar);
       this.inWorld = false;      
+      this.appeared = false;
     }
   }
   
@@ -263,26 +185,27 @@ class AirGuitar {
         var pentatonic = [0, 2, 4, 7, 9, 12];
 
 
-        var bendQuantoY = Math.round(LeftY/0.2);
+        var bendQuantoY = Math.ceil(6*LeftY); //hexatonic.
         var bendQuantoX = Math.round(LeftX);
 
         var bendQuanto = bendQuantoY;
 
-        if (LeftY >= 0 && LeftY <=0.2) {
-          bendQuanto = 1;
-        }
-         else if (LeftY <= 0.4) {
-          bendQuanto = 2;
-        }
-        else if (LeftY <= 0.6) {
-          bendQuanto = 3;
-        }
-        else if (LeftY <= 0.8) {
-          bendQuanto = 4;
-        }
-        else if (LeftY <= 1.0) {
-          bendQuanto = 5;
-        }
+
+        //if (LeftY >= 0 && LeftY <=0.2) {
+        //  bendQuanto = 1;
+        //}
+        // else if (LeftY <= 0.4) {
+        //  bendQuanto = 2;
+        //}
+        //else if (LeftY <= 0.6) {
+        //  bendQuanto = 3;
+        //}
+        //else if (LeftY <= 0.8) {
+        //  bendQuanto = 4;
+        //}
+        //else if (LeftY <= 1.0) {
+        //  bendQuanto = 5;
+        //}
 
 
         // var bendQuantoY = Math.round(LeftY/0.166);
@@ -313,6 +236,7 @@ class AirGuitar {
 
         if (bendQuanto < 0 || bendQuanto > 6){
           bendQuanto = 0;
+          return;
         }
         
 
@@ -323,7 +247,7 @@ class AirGuitar {
 
               // document.getElementById("bendQuanto").innerHTML = bendQuanto;     
 
-    this.avatar.refreshHands(bendQuanto);        
+         this.avatar.refreshHands(bendQuanto);        
 
         if (Date.now() - this.previousTime < this.refreshTime) {
           return;
@@ -335,28 +259,25 @@ class AirGuitar {
         if (!play) {
           return;
         }
-        
-        var audio = null;
 
-        if (bendQuanto == 6) {
-          this.player.queueWaveTable(this.audioContext, this.audioContext.destination
-            , _tone_0300_LesPaul_sf2, 0, 12*4+2, 1);
-        }
-        else if (bendQuanto == 5) {
-          this.player.queueWaveTable(this.audioContext, this.audioContext.destination
-            , _tone_0300_LesPaul_sf2, 0, 12*4+5, 1);
-        }
-        else if (bendQuanto == 4) {
-          this.player.queueWaveTable(this.audioContext, this.audioContext.destination
-            , _tone_0300_LesPaul_sf2, 0, 12*4+7, 1);
-        }
-        else if (bendQuanto == 3) {
-          this.player.queueWaveTable(this.audioContext, this.audioContext.destination
-            , _tone_0300_LesPaul_sf2, 0, 12*4+8, 1);
-        }
-        else if (bendQuanto == 2) {
-        }
-        else if (bendQuanto == 1) {
-        }
-      }
+        this.pluck(bendQuanto);
+	}
+
+	pluck(bendQuanto) {
+      this.value[bendQuanto] = this.value[bendQuanto] * (-1); //inverting the pluck direction after each call.
+      console.log(bendQuanto);
+      console.log(this.value[bendQuanto]);
+	    var data = {
+	        "sessionId" : this.sessionId,
+	        "parameters" : [
+              {
+                  "partId": bendQuanto,
+                  "name" : "position",
+                  "value": this.value[bendQuanto],
+                  "when" : 0.1
+              }
+	        ]
+	    }
+      this.modalysChannel.publish("updateParameter",data);
+    }
 }

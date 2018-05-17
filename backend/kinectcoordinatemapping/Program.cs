@@ -1,4 +1,4 @@
-using Microsoft.Kinect; //
+﻿using Microsoft.Kinect; //
 using Microsoft.Kinect.VisualGestureBuilder;
 using System; //
 using System.Collections.Generic; //
@@ -220,17 +220,13 @@ namespace KinectCoordinateMapping
                     _bodies = new Body[frame.BodyFrameSource.BodyCount];
                     frame.GetAndRefreshBodyData(_bodies);
 
-                    // Console.WriteLine("Reading Bodies");
                     foreach (var body in _bodies)
                     {
-
- 
                         if (body.IsTracked && !gotBody)
                         {
                             gotBody = true;
                             foreach (var client in clients)
                             {
-                                // This is working Console.WriteLine("what the hell 3- HEREEEEEE");
                                 var users = _bodies.Where(s => s.IsTracked.Equals(true)).ToList();
                                 if (users.Count > 0)
                                 {

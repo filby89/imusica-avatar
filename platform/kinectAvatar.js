@@ -129,25 +129,32 @@ class kinectAvatar{
 	}
 
 	addToScene(scene){
-		this.active = true;
-		this.scene = scene;
+	    if (!this.active)
+	    {
+	        this.active = true;
+	        this.scene = scene;
+	
+	    }
 	}
 
 	removeFromScene(scene){
-		this.world.removeLines(this.lines_in_world);
-		this.active = false;
-		if (this.handRight != null) {
-			this.scene.remove(this.handRight);
-			this.handRight = null;
-		}
-		if (this.handLeft != null) {
-			this.scene.remove(this.handLeft);
-			this.handLeft = null;
-		}
-		if (this.head !=null) {			
-			this.scene.remove(this.head);
-			this.head = null;
-		}
+	    if (this.active)
+	    {
+	        this.world.removeLines(this.lines_in_world);
+	        this.active = false;
+	        if (this.handRight != null) {
+	            this.scene.remove(this.handRight);
+	            this.handRight = null;
+	        }
+	        if (this.handLeft != null) {
+	            this.scene.remove(this.handLeft);
+	            this.handLeft = null;
+	        }
+	        if (this.head !=null) {			
+	            this.scene.remove(this.head);
+	            this.head = null;
+	        }
+	    }
 	}
 
 	doDispose (obj)
@@ -199,7 +206,7 @@ class kinectAvatar{
 		}
 
 		if (this.counter % 1000 == 0){
-			console.log('this.body ',this.body);
+			// console.log('this.body ',this.body);
 		}
 
 		// this.world.removeLines(this.lines_in_world);
@@ -230,12 +237,12 @@ class kinectAvatar{
 		    return edge;
 		}
 
-		this.center = new THREE.Vector3(
-			data.joints[this.inverseJointType["SpineBase"]].x*this.scale*this.mirror, 
-			data.joints[this.inverseJointType["SpineBase"]].y*this.scale, 
-			data.joints[this.inverseJointType["SpineBase"]].z*this.scale);
+		//this.center = new THREE.Vector3(
+		//	data.joints[this.inverseJointType["SpineBase"]].x*this.scale*this.mirror, 
+		//	data.joints[this.inverseJointType["SpineBase"]].y*this.scale, 
+		//	data.joints[this.inverseJointType["SpineBase"]].z*this.scale);
 		//var pointY = new THREE.Vector3(data.joints[this.inverseJointType[jointEnd]].x*this.scale*this.mirror, data.joints[this.inverseJointType[jointEnd]].y*this.scale, data.joints[this.inverseJointType[jointEnd]].z*this.scale);
-	
+			this.center = new THREE.Vector3(0,0,1.7);
 
 		for (i=0; i<this.BoneLines.length;i++) {
 			var jointStart = this.BoneLines[i].jointStart;
@@ -469,7 +476,7 @@ class kinectAvatar{
 		else {
 			material = new THREE.MeshBasicMaterial( {color: colors[bendQuanto-1]} );
 		}
-		console.log(bendQuanto);
+		// console.log(bendQuanto);
 		if (this.handLeft != null) {
 			this.handLeft.material = material;
 			material.needsUpdate = true;
