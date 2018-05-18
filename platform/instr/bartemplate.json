@@ -1,0 +1,62 @@
+{
+  "part" : "DynModes_$ = ##modes##\nDynLength_$ = ##length##\nDynWidth_$ = ##width##\nDynThickness_$ = ##thickness##\nDynDensity_$ = ##density##\nDynYoung_$ = ##young##\nDynPoisson_$ = ##poisson##\nDynFreqLoss_$ = ##freqLoss##\nDynConstLoss_$ = ##constLoss##\nbar_$ = make_object('RECT-FREE-BAR', DynModes_$, DynLength_$, DynWidth_$, DynThickness_$, DynDensity_$, DynYoung_$, DynYoung_$, DynPoisson_$, DynFreqLoss_$, DynConstLoss_$)\n@@pitch\nDynPitch_$ = make_controller('CONSTANT', 1, ##pitch##)\nbar_$ = set_pitch(bar_$, 'LENGTH', DynPitch_$)\npitch@@\nConstantController_10_$ = make_controller('CONSTANT', 1, 0.1)\nConstantController_11_$ = make_controller('CONSTANT', 1, 0.1)\nConstantController_12_$ = make_controller('CONSTANT', 1, 100000)\nConstantController_13_$ = make_controller('CONSTANT', 1, 100)\nConstantController_14_$ = make_controller('CONSTANT', 1, 0)\nMY_HAMMER_$ = make_object('MONO-TWO-MASS', ConstantController_10_$, ConstantController_11_$, ConstantController_12_$, ConstantController_13_$, ConstantController_14_$)\nConstantController_19_$ = ##impactCoords##\nMY_BAR_HIT_$ = make_access(bar_$, ConstantController_19_$, 'NORMAL')\nConstantController_20_$ = make_controller('CONSTANT', 1, [1])\nMY_HAMMER_HIT_$ = make_access(MY_HAMMER_$, ConstantController_20_$, 'TRANS0')\nConstantController_21_$ = make_controller('CONSTANT', 1, [0.01])\nConstantController_22_$ = make_controller('CONSTANT', 1, [1e+09])\nConstantController_23_$ = make_controller('CONSTANT', 1, [2.3])\nConstantController_24_$ = make_controller('CONSTANT', 1, [0.83])\nConstantController_25_$ = make_controller('CONSTANT', 1, [0.004])\n%FeltConnection_1_$ = make_connection('FELT', MY_BAR_HIT_$, 0, MY_HAMMER_HIT_$, 0.25, ConstantController_21_$, ConstantController_22_$, ConstantController_23_$, ConstantController_24_$, ConstantController_25_$)\nStrikeConnection_1_$ = make_connection('STRIKE', MY_BAR_HIT_$, 0, MY_HAMMER_HIT_$, 0.25)\nConstantController_26_$ = make_controller('CONSTANT', 1, [0])\nMY_HAMMER_MOV_$ = make_access(MY_HAMMER_$, ConstantController_26_$, 'TRANS0')\nMalletPosition_$ = ##malletPosition##\nPositionConnection_1_$ = make_connection('POSITION', MY_HAMMER_MOV_$, MalletPosition_$)\nConstantController_27_$ = ##outputPoint##\nMY_BAR_OUT_$ = make_access(bar_$, ConstantController_27_$, 'NORMAL')\nOUTPUTGAIN_$ = ##outputgain##\nPointOutput_1_$ = make_point_output(MY_BAR_OUT_$, 0, OUTPUTGAIN_$)\n",
+  "physicalParameters" : {
+      "modes" : 30,
+      "length" : 1.0,
+      "width" : 0.05,
+      "thickness" : 0.005,
+      "density" : 7700,
+      "young" : 2.0e11,
+      "poisson" : 0.31,
+      "freqLoss" : 0.1,
+      "constLoss" : 0.3,
+      "pitch" : 261.63
+  },
+  "performanceParameters" : [
+    {
+      "name" : "impactCoords",
+      "type" : ["float", "float"],
+      "default" : [0.5, 0.3],
+      "min" : [0.001, 0.001],
+      "max" : [0.999, 0.999]
+    },
+    {
+      "name" : "malletPosition",
+      "type" : "float",
+      "default" : 0.25,
+      "min" : -0.05,
+      "max" : 0.5,
+      "try" : [[0, 0.25], [0.01, 0.02], [0.02, 0.25]]
+    },
+    {
+      "name" : "outputPoint",
+      "type" : ["float", "float"],
+      "default" : [0.5, 0.9],
+      "min" : [0.001, 0.001],
+      "max" : [0.999, 0.999]
+    },
+    {
+      "name" : "outputgain",
+      "type" : "float",
+      "default" : 2.0,
+      "min" : 0
+    }
+  ],
+  "materials" : {
+    "steel": {
+      "density": 7700,
+      "young": 200000000000,
+      "poisson": 0.31
+    },
+    "rosewood": {
+      "density": 950,
+      "young": 22150000000,
+      "poisson": 0.35
+    },
+    "ebony": {
+      "density": 1010,
+      "young": 18500000000,
+      "poisson": 0.35
+    }
+  }
+}

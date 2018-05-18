@@ -2,15 +2,15 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <title>Kinect &amp; HTML5</title>
+        <title>iMuSciCA - Athena</title>
+        <link rel="icon" href="http://www.imuscica.eu/wp-content/uploads/2017/02/cropped-logo-1-32x32.png" sizes="32x32" />
         <link rel="stylesheet" type="text/css" href="bootstrap4/css/bootstrap.css" />
     </head>
     <body>
     <!-- Just an image -->
 <nav class="navbar navbar-light bg-primary text-white">
   <a class="navbar-brand text-white" href="#">
-    <!-- <img src="/assets/brand/bootstrap-solid.svg" width="30" height="30" alt=""> -->
-    IMuSciCA (WHAT An EDIT)
+    <img src="logo.png" height="30" alt="">
   </a>
 </nav>
 
@@ -21,44 +21,35 @@
 		<div id="world" width="960" height="540"></div>
     </div>
     <div class="col-3">
-      <div class="card" style="width: 18rem;">
-	  <div class="card-body">
-	    <h5 class="card-title">Details</h5>
-			<h6> <label id="status">None</label> </h6>
+        <div class="row">
+            <div class="col">
+              <div class="card" style="width: 18rem;">
+        	  <div class="card-body">
+        	    <h5 class="card-title">Details</h5>
+        			<h6> <label id="status">None</label> </h6>
 
-<div class="form-group">
-  <label for="mode">Select list:</label>
-  <select class="form-control" id="mode">
-	        <option value="1">Air Guitar</option>
-	        <option value="2">Cello</option>
-	        <option value="3">Double Instrument</option>
-      <option value="4"> Two Player Operation</option>
-  </select>
-</div>
-        <button type="button" id="start-button"  class="btn btn-primary">Start Mode</button>
+                <div class="form-group">
+                  <label for="mode">Select list:</label>
+                  <select class="form-control" id="mode">
+                	        <option value="1">Air Guitar</option>
+                	        <option value="2">Upright Bass</option>
+                	        <option value="3">Double Instrument</option>
+                      <option value="4"> Two Player Operation</option>
+                  </select>
+                </div>
+                <button type="button" id="start-button"  class="btn btn-primary">Start Mode</button>
 
-			<table class="table">
-			  <tbody>
-                  <tr><td>Running:</td> <td id="running"></td></tr>
-				<tr><td>RH x position:</td> <td id="HR_x"></td> </tr>
-				<tr><td>RH y position:</td> <td id="HR_y"></td> </tr> 
-				<tr><td>RH z position:</td> <td id="HR_z"></td> </tr> 
-				<tr><td>LH x position:</td> <td id="HL_x"></td> </tr>
-				<tr><td>LH y position:</td> <td id="HL_y"></td> </tr> 
-				<tr><td>LH z position:</td> <td id="HL_z"></td> </tr> 
-				<tr><td>bendQuanto:</td> 	<td id="bendQuanto"></td> </tr> 
-				<tr><td>GestureDirection:</td> <td id="GestureDirection"></td> </tr> 
-				<tr><td>RightX:</td> <td id="RightX"></td> </tr> 
-<!--				<tr><td>RightXVel:</td> <td id="RightXVel"></td> </tr>   -->
-			  </tbody>
-			</table>
+                <button type="button" id="stop-button"  class="btn btn-danger">Disconnect</button>
+        	  </div>
+        	</div>
+            </div>
 
-
-        <button type="button" id="stop-button"  class="btn btn-danger">Disconnect</button>
-	  </div>
-	</div>
+        </div>
     </div>
+            <div class="row" id="players">
+            </div>
   </div>
+
 </div>
 		
 
@@ -66,32 +57,32 @@
 		#world {
 			min-height: 540px;
 		}
-		.table {
-			margin-top: 50px;
-		}
+        #players {
+            padding-left: 30px;
+        }
 		</style>
 				
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
-		<script src="three.js"></script>
-		<script src="OrbitControls.js"></script>
-		<script type="text/javascript" src="Pizzicato.js"></script>
-		<script type="text/javascript" src="kinectAvatar.js"></script>
-		<script type="text/javascript" src="world.js"></script>
-		<script type="text/javascript" src="Tone.js"></script>
-		<script type="text/javascript" src="THREE.MeshLine.js"></script>
-		<script type="text/javascript" src="pitchVolumeOrgan.js"></script>
-		<script type="text/javascript" src="airGuitar.js"></script>
-		<script type="text/javascript" src="airCello.js"></script>
-		<script src='https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js'></script>
-		<script src='https://surikov.github.io/webaudiofontdata/sound/0300_LesPaul_sf2.js'></script>
-		<script src='https://surikov.github.io/webaudiofontdata/sound/0130_FluidR3_GM_sf2_file.js'></script>
-		<script src='https://surikov.github.io/webaudiofontdata/sound/0430_SBLive_sf2.js'></script>
-      <script src="lodash.min.js"></script>
-          <script src="postal.min.js"></script>
-          <script src="modalys.js"></script>
-          		<script>
+<script src="three.js"></script>
+<script src="OrbitControls.js"></script>
+<script type="text/javascript" src="Pizzicato.js"></script>
+<script type="text/javascript" src="kinectAvatar.js"></script>
+<script type="text/javascript" src="world.js"></script>
+<script type="text/javascript" src="player.js"></script>
+<script type="text/javascript" src="Tone.js"></script>
+<script type="text/javascript" src="THREE.MeshLine.js"></script>
+<script type="text/javascript" src="pitchVolumeOrgan.js"></script>
+<script type="text/javascript" src="airGuitar.js"></script>
+<script type="text/javascript" src="airCello.js"></script>
+<script src='https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js'></script>
+<script src='https://surikov.github.io/webaudiofontdata/sound/0300_LesPaul_sf2.js'></script>
+<script src='https://surikov.github.io/webaudiofontdata/sound/0130_FluidR3_GM_sf2_file.js'></script>
+<script src='https://surikov.github.io/webaudiofontdata/sound/0430_SBLive_sf2.js'></script>
+<script src="lodash.min.js"></script>
+<script src="postal.min.js"></script>
+<script src="modalys.js"></script>
+<script>
 
       
    
@@ -134,10 +125,7 @@ window.onload = function () {
 	                }
 	            }
                 l = l/1.1225; //reducing the length per chord should result in a higher tone...
-	            
-
-	            }
-	    
+	        }
 	        //var parts = [];
 	        modalysChannel.publish("play", {
 	            "requestId": "123456",
@@ -150,32 +138,17 @@ window.onload = function () {
 	});
 
     //World and avatar initialization.
-	 var world = new interactionWorld(document.getElementById("world"));
-	 world.init();
-	 console.log("World initialized");
-	 var avatar, avatar2, pitchVolumeOrgan, airCello, airCello2, airGuitar, airGuitar2;
+    var world = new interactionWorld(document.getElementById("world"));
+    world.init();
 
-	 avatar = new kinectAvatar(world, 1, false);
-	 avatar.addToScene(world.scene); //right-of-cam avatar
-	 avatar2 = new kinectAvatar(world, 1, false);
-	 avatar2.addToScene(world.scene); //left-of-cam avatar
-	 pitchVolumeOrgan = new PitchVolumeOrgan();
+    var players = [];
 
-    // var current_pids = [];
-    //each avatar gets potentially assigned a guitar and a cello.
-	 airCello = new AirCello(world, avatar);
-	 airCello2 = new AirCello(world, avatar2);
-
-	 modalysChannel.subscribe("notification", function (data) {
-	     if (data.hasOwnProperty('status') && data.status == 'ready') {
-	         sessionId = data.sessionId;
-	         console.log(data.sessionId);
-	         
-	         airGuitar = new AirGuitar(world, avatar, modalysChannel, sessionId);
-	         airGuitar2 = new AirGuitar(world, avatar2, modalysChannel, sessionId);
-	     }
-	 });
-      // console.log(data);
+	modalysChannel.subscribe("notification", function (data) {
+        if (data.hasOwnProperty('status') && data.status == 'ready') {
+            sessionId = data.sessionId;
+            console.log(data.sessionId);
+        }
+	});
     
 
 
@@ -186,7 +159,7 @@ window.onload = function () {
     }
 
     status.innerHTML = "Connecting to server...";
-	    var socket = new WebSocket("ws://localhost:8181");
+    var socket = new WebSocket("ws://localhost:8181");
 
     /* modes:
 	0: idle
@@ -198,9 +171,8 @@ window.onload = function () {
 
     var mode = 0;
   	var buttonSwitchMode = $("#start-button");	
-  	console.log("We have reached an informational threshold")
 
-  	buttonSwitchMode.click(function () { //does this only activate on start/stop clicking?
+  	buttonSwitchMode.click(function () { //does this only activate on start/stop clicking? // yeap! -
     	if (mode > 0) {
     		buttonSwitchMode.addClass("btn-primary");
     		buttonSwitchMode.removeClass("btn-warning");
@@ -212,41 +184,6 @@ window.onload = function () {
     		buttonSwitchMode.removeClass("btn-primary");
     		buttonSwitchMode.html("Stop");
     		mode = parseInt($("#mode").val());
-    		avatar.removeFromScene(world.scene);
-    		avatar2.removeFromScene(world.scene);
-    	}
-
-    	if (mode == 1) {
-    	    airGuitar.add_to_world(); //add_to_world does not now create a picture, but it merely denotes that the object is possibly active
-    	    airGuitar2.add_to_world();
-    	}
-    	else {
-    	    if (mode != 4)
-    	        airGuitar.remove_from_world();
-    	    airGuitar2.remove_from_world();
-    	}
-
-    	if (mode == 2) {
-    	    airCello.add_to_world();
-    	    airCello2.add_to_world();
-    	}
-    	else {
-    	    airCello.remove_from_world();
-    	    if (mode != 4)
-    	        airCello2.remove_from_world();
-    	}
-    	if (mode == 3)
-        	    console.log("...");
-    	if (mode == 4) //Guitar-Cello mode. Avatar->guitar, avatar2->cello.
-    	{
-    	    airGuitar.add_to_world();
-            airCello2.add_to_world();
-    	}
-    	else {
-    	    if (mode != 1)
-    	        airGuitar.remove_from_world();
-            if (mode != 2)
-    	        airCello2.remove_from_world();
     	}
     });
 
@@ -278,105 +215,69 @@ window.onload = function () {
 				}
 			}
 
-            //trial for showing correct no. of avatars dep. on mode.
-			if (jsonObject.skeletons)
-			{   
-			    if (mode == 4) //Display two avatars
-			    {
-			        avatar.addToScene(world.scene);
-			        avatar2.addToScene(world.scene);
-			    }
-			    else if (mode != 0) //Display the appropriate avatar
-			    {
-			        if (jsonObject.skeletons[0].joints[0].x > 0) {
-			            avatar2.addToScene(world.scene);
-                        avatar.removeFromScene(world.scene);
-			            airGuitar.remove_from_world();
-			        }
-			        else {
-			            avatar.addToScene(world.scene);
-			            avatar2.removeFromScene(world.scene);
-                        airGuitar2.remove_from_world();
-			        }
-			    }
-			    else //Display zero avatars.
-			    {
-			        avatar.removeFromScene(world.scene);
-			        avatar2.removeFromScene(world.scene);
-			    }
-			}
-            //isn't this an "else" ? [still case 2 btw]
             if (jsonObject.skeletons) {
                 // refresh html elements [regardless of start/stop, this only refreshes the screen]
                 for (var i = 0; i < jsonObject.skeletons.length; i++) {
-                    var pos = jsonObject.skeletons[i].pid; //denoting right/left of cam 
-                    if ((pos == 0) && avatar.active) {
-                        avatar.refresh(jsonObject.skeletons[i]);
-                        airGuitar.refreshGuitar(jsonObject.skeletons[i].joints[0]); //refresh is now responsible for initializing the image
-                        airCello.refreshCello(jsonObject.skeletons[i].joints[0]);
-                    }
-                    else if ((pos == 1) && avatar2.active) {
-                        avatar2.refresh(jsonObject.skeletons[i]);
-                        airGuitar2.refreshGuitar(jsonObject.skeletons[i].joints[0]);
-                        airCello2.refreshCello(jsonObject.skeletons[i].joints[0]);
-                    }
-
-                    for (var j = 0; j < jsonObject.skeletons[i].joints.length; j++) {
-                        var joint = jsonObject.skeletons[i].joints[j];
-
-                        if (joint.name == "HandRight") {
-                            var HL_x = joint.x;
-                            document.getElementById("HR_x").innerHTML = HL_x.toPrecision(4);
-                            var HL_y = joint.y;
-                            document.getElementById("HR_y").innerHTML = HL_y.toPrecision(4);
-                            var HL_z = joint.z;
-                            document.getElementById("HR_z").innerHTML = HL_z.toPrecision(4);
-                        }
-                        else if (joint.name == "HandLeft") {
-                            var HL_x = joint.x;
-                            document.getElementById("HL_x").innerHTML = HL_x.toPrecision(4);
-                            var HL_y = joint.y;
-                            document.getElementById("HL_y").innerHTML = HL_y.toPrecision(4);
-                            var HL_z = joint.z;
-                            document.getElementById("HL_z").innerHTML = HL_z.toPrecision(4);
-
+                    var ID = jsonObject.skeletons[i].id;
+                    // console.log(ID);
+                    var found = false;
+                    for (var j = 0; j < players.length; j++) {
+                        if (players[j].ID == ID) {
+                            if (mode != 4) {
+                                players[j].refresh(jsonObject.skeletons[i], mode);
+                            }
+                            else {
+                                var _mode = 1+j%2;
+                                players[j].refresh(jsonObject.skeletons[i], _mode);
+                            }
+                            found = true;
+                            // console.log("Refreshin");
                         }
                     }
-                    // play sound
-
-                    if (running || true) { //always?
-                        if (mode == 1) {
-                            if (pos == 0 && avatar.active)
-                                airGuitar.refresh(jsonObject.skeletons[i]);
-                            else if (pos == 1 && avatar2.active)
-                                airGuitar2.refresh(jsonObject.skeletons[i]);
-                        }
-                        if (mode == 2) {
-                            if (pos == 0 && avatar.active)
-                                airCello.refresh(jsonObject.skeletons[i]);
-                            else if (pos == 1 && avatar2.active)
-                                airCello2.refresh(jsonObject.skeletons[i]);
-                        }
-                        else if (mode == 3) { //ignored for the time being.
-                            pitchVolumeOrgan.refresh(jsonObject.skeletons[0]);
-                        }
-                        else if (mode == 4) {
-                            if (pos == 0) //no avatar check, in this mode both are activated
-                                airGuitar.refresh(jsonObject.skeletons[i]);
-                            else
-                                airCello2.refresh(jsonObject.skeletons[i]);
-                        }
+                    // console.log(players.length);
+                    if (!found) {
+                        var player = new Player(world, ID, modalysChannel, sessionId, $("#players"));
+                        // player.refresh(jsonObject.skeletons[i], mode);
+                        players.push(player);
                     }
                 }
 
-	        }    
+                // do the reverse - search if a player was lost so that we remove him -- todo a better implementation 
+                // quick fix for now
+                for (var j = 0; j < players.length; j++) {
+                    var ID = players[j].id;
+
+                    var found = false;
+
+                    for (var i = 0; i < jsonObject.skeletons.length; i++) {
+                        if (jsonObject.skeletons[i].ID == ID) {
+                            found = true;
+                        }
+                    }
+
+                    if (!found) {
+                        players[j].removeFromScene();
+                        players.splice(j,1);
+                    }
+                }                
+            }
+
         }
     }
 
+    // remove avatars that have not been refreshed in the last 200 ms
+    setInterval(function() {
+        for (var i=0; i<players.length; i++) {
+            // console.log(players[i].last_refresh-Date.now());
+           if (Date.now() - players[i].last_refresh > 500) {
+                players[i].removeFromScene();
+                players.splice(i,1);
+            } 
+        }
+    }, 30);
+
 
     socket.onclose = function (event) {
-		console.log("Connection closed.");
-		
         var code = event.code;
         var reason = event.reason;
         var wasClean = event.wasClean;		
@@ -404,8 +305,8 @@ window.onload = function () {
         status.classList.add("text-success");
 		console.log("Connection successful.");
     };
-	
 }
+	
 		</script>
 
     </body>

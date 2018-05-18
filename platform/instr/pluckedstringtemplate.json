@@ -1,0 +1,104 @@
+{
+  "part" : "DYN_1_$ = ##modes##\nDYN_2_$ = ##length##\nDYN_3_$ = ##tension##\nDYN_4_$ = ##density##\nDYN_5_$ = ##radius##\nyoung_$ = make_controller('CONSTANT', 1, 1)\nDYN_7_$ = ##freqLoss##\nDYN_8_$ = ##constLoss##\nMONO_STRING_$ = make_object('MONO-STRING', DYN_1_$, DYN_2_$, DYN_3_$, DYN_4_$, DYN_5_$, young_$, DYN_7_$, DYN_8_$)\nCONST_9_$ = make_controller('CONSTANT', 1, 0.01)\nCONST_10_$ = make_controller('CONSTANT', 1, 0.01)\nCONST_11_$ = make_controller('CONSTANT', 1, 15000)\nCONST_12_$ = make_controller('CONSTANT', 1, 15000)\nCONST_13_$ = make_controller('CONSTANT', 1, 100)\nCONST_14_$ = make_controller('CONSTANT', 1, 100)\nCONST_15_$ = make_controller('CONSTANT', 1, 0)\nCONST_16_$ = make_controller('CONSTANT', 1, 0)\nMY_PLECTRUM_$ = make_object('BI-TWO-MASS', CONST_9_$, CONST_10_$, CONST_11_$, CONST_12_$, CONST_13_$, CONST_14_$, CONST_15_$, CONST_16_$)\nPluckAccessPointController_$ = ##pluckpoint##\nMY_STRING_PLK_$ = make_access(MONO_STRING_$, PluckAccessPointController_$, 'TRANS0')\nCONST_19_$ = make_controller('CONSTANT', 1, [1])\nMY_PLECTRUM_PLK_$ = make_access(MY_PLECTRUM_$, CONST_19_$, 'TRANS0')\nCONST_20_$ = make_controller('CONSTANT', 1, [50])\nmake_connection('PLUCK', MY_STRING_PLK_$, 0, MY_PLECTRUM_PLK_$, 0.1, CONST_20_$)\nCONST_21_$ = make_controller('CONSTANT', 1, [0])\nMY_PLECTRUM_MOV_$ = make_access(MY_PLECTRUM_$, CONST_21_$, 'TRANS0')\nPlectrumPosition_$ = ##position##\nmake_connection('POSITION', MY_PLECTRUM_MOV_$, PlectrumPosition_$)\nLISTENINGPOINT_$ = ##listeningpoint##\nMY_STRING_OUT_$ = make_access(MONO_STRING_$, LISTENINGPOINT_$, 'TRANS0')\nOUTPUTGAIN_$ = ##outputgain##\nPointOutput_$ = make_point_output(MY_STRING_OUT_$, 0, OUTPUTGAIN_$)\n",
+  "physicalParameters" : {
+      "modes" : 30,
+      "length" : 0.33,
+      "tension" : 292,
+      "density" : 1000,
+      "radius" : 0.00085,
+      "freqLoss" : 0.2,
+      "constLoss" : 0.2
+  },
+  "performanceParameters" : [
+    {
+      "name" : "pluckpoint",
+      "type" : "float",
+      "default" : 0.6,
+      "min" : 0.001,
+      "max" : 0.999
+    },
+    {
+      "name" : "position",
+      "type" : "float",
+      "default" : 0.1,
+      "min" : -0.5,
+      "max" : 0.5,
+      "try" : [[0, 0.5], [0.01, -0.5], [0.02, 0.5]]
+    },
+    {
+      "name" : "listeningpoint",
+      "type" : "float",
+      "default" : 0.3,
+      "min" : 0.001,
+      "max" : 0.999
+    },
+    {
+      "name" : "outputgain",
+      "type" : "float",
+      "default" : 2.0,
+      "min" : 0
+    },
+    {
+      "name" : "pitchbend",
+      "type" : "int",
+      "default" : 0,
+      "min" : -200,
+      "max" : 200,
+      "object" : "MONO_STRING_"
+    }
+  ],
+  "materials" : {
+    "steel": {
+      "density": 7700,
+      "young": 200000000000
+    },
+    "nylon": {
+      "density": 1175,
+      "young": 5000000000
+    },
+    "catgut": {
+      "density": 1300,
+      "young": 6000000000
+    }
+  },
+  "presets" : {
+    "violin" : [
+      {
+        "partId" : "e",
+        "physicalParameters" : {
+          "length" : 0.33,
+          "radius" : 0.00025,
+          "tension" : 286,
+          "material" : "steel"
+        }
+      },
+      {
+        "partId" : "a",
+        "physicalParameters" : {
+          "length" : 0.33,
+          "radius" : 0.00038,
+          "tension" : 295,
+          "material" : "steel"
+        }
+      },
+      {
+        "partId" : "D",
+        "physicalParameters" : {
+          "length" : 0.33,
+          "radius" : 0.00057,
+          "tension" : 295,
+          "material" : "steel"
+        }
+      },
+      {
+        "partId" : "G",
+        "physicalParameters" : {
+          "length" : 0.33,
+          "radius" : 0.00085,
+          "tension" : 292,
+          "material" : "steel"
+        }
+      }
+    ]
+  }
+}

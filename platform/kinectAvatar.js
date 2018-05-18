@@ -94,6 +94,7 @@ class kinectAvatar{
 		this.world = world;
 
 		this.scene = this.world.scene;
+
 		this.active = false;
 
 		this.line_material = new THREE.LineBasicMaterial({
@@ -128,16 +129,14 @@ class kinectAvatar{
 		this.quantoNormal = new THREE.MeshNormalMaterial();
 	}
 
-	addToScene(scene){
+	addToScene(){
 	    if (!this.active)
 	    {
 	        this.active = true;
-	        this.scene = scene;
-	
 	    }
 	}
 
-	removeFromScene(scene){
+	removeFromScene(){
 	    if (this.active)
 	    {
 	        this.world.removeLines(this.lines_in_world);
@@ -482,5 +481,25 @@ class kinectAvatar{
 			material.needsUpdate = true;
 		}
 	}
+
+	refreshRightHand(bendQuanto, num_segments) {
+    	var colors = [0xFFFA0D,0xE8760C,0xFF00A4,0x0C19E8,0x00FFB5, 0xA211E8, 0x0692FF, 0xFF3906];
+
+		var color, material;
+
+		if (bendQuanto < 0 || bendQuanto > num_segments) {
+			material = this.quantoNormal;
+		}
+		else {
+			material = new THREE.MeshBasicMaterial( {color: colors[bendQuanto-1]} );
+		}
+		// console.log(bendQuanto);
+		if (this.handRight != null) {
+			this.handRight.material = material;
+			material.needsUpdate = true;
+		}
+	}
+
+
 }
 

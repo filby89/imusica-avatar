@@ -1,0 +1,201 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Modalys Standalone</title>
+</head>
+<body>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <script src="three.js"></script>
+    <script src="OrbitControls.js"></script>
+    <script type="text/javascript" src="Pizzicato.js"></script>
+    <script type="text/javascript" src="kinectAvatar.js"></script>
+    <script type="text/javascript" src="world.js"></script>
+    <script type="text/javascript" src="Tone.js"></script>
+    <script type="text/javascript" src="THREE.MeshLine.js"></script>
+    <script type="text/javascript" src="pitchVolumeOrgan.js"></script>
+    <script type="text/javascript" src="airGuitar.js"></script>
+    <script type="text/javascript" src="airCello.js"></script>
+    <script src='https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js'></script>
+    <script src='https://surikov.github.io/webaudiofontdata/sound/0300_LesPaul_sf2.js'></script>
+    <script src='https://surikov.github.io/webaudiofontdata/sound/0130_FluidR3_GM_sf2_file.js'></script>
+    <script src='https://surikov.github.io/webaudiofontdata/sound/0430_SBLive_sf2.js'></script>
+    <script src="lodash.min.js"></script>
+    <script src="postal.min.js"></script>
+    <script src="modalys.js"></script>
+    <script>
+
+        window.onload = function () {
+            var buttonStop = document.getElementById("stop-button");
+            var label = document.getElementById("status-label");
+            var status = document.getElementById("status");
+            var running = 1;
+
+            var modalysChannel = postal.channel("modalys");
+            var sessionId;
+
+            $("document").ready(function () {
+                Modalys.isready.then(function () {
+
+                    //initialize the Modalys engine
+                    var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    Modalys.init(audioContext);
+                    Modalys.output.connect(audioContext.destination);
+                    console.log("Modalys should be initialized...");
+                    var l = 1;
+                    var parts = [];
+                    //initialize the guitar chords
+                    for (var i = 0; i < 6; i++) {
+                        var x = i * 0.1;
+                        //var y = Math.pow(0.6666, i); //.... that is not an octave diff, will likely reset to 0.943....
+                        parts[i] = {
+                            "partId": i + 1,
+                            "physicalParameters": {
+                                "attachmentPoints": [{
+                                    "x": x,
+                                    "y": 0.0,
+                                    "z": 0.0
+                                }, {
+                                    "x": x,
+                                    "y": l,
+                                    "z": 0.0
+                                }],
+                                "radius": 0.001, //might edit.
+                                "tension": 94.66
+                            }
+                        }
+                        l = l/1.1225; //1.1225 to cover an octave?
+
+                    }
+
+                    modalysChannel.publish("play", {
+                        "requestId": "123456",
+                        "instrumentType": "pluckedString",
+                        "name": "My polychord",
+                        "parts": parts
+                    });
+                    console.log("Publish request sent.");
+                });
+            });
+
+            modalysChannel.subscribe("notification", function (data) {
+                if (data.hasOwnProperty('status') && data.status == 'ready') {
+                    sessionId = data.sessionId;
+                    console.log(data.sessionId);
+                }
+            });
+
+            window.setTimeout(noteA, 5000);
+            window.setTimeout(noteB, 8000);
+            window.setTimeout(noteC, 11000);
+            window.setTimeout(noteD, 14000);
+            window.setTimeout(noteE, 17000);
+            window.setTimeout(noteF, 20000);
+
+            function noteA() {
+                console.log(sessionId);
+                var data = {
+                    "sessionId": sessionId,
+                    "parameters": [
+                        {
+                            "partId": 1,
+                            "name": "position",
+                            "value": -0.5,
+                            "when": 0.1
+                        }
+                    ]
+                };
+                modalysChannel.publish("updateParameter", data);
+                console.log("5 seconds");
+            }
+
+            function noteB() {
+                var data = {
+                    "sessionId": sessionId,
+                    "parameters": [
+                        {
+                            "partId": 2,
+                            "name": "position",
+                            "value": -0.5,
+                            "when": 0.1
+                        }
+                    ]
+                };
+                modalysChannel.publish("updateParameter", data);
+                console.log("15 seconds");
+            }
+
+            function noteC() {
+                var data = {
+                    "sessionId": sessionId,
+                    "parameters": [
+                        {
+                            "partId": 3,
+                            "name": "position",
+                            "value": -0.5,
+                            "when": 0.1
+                        }
+                    ]
+                };
+                modalysChannel.publish("updateParameter", data);
+                console.log("25 seconds");
+            }
+
+            function noteD() {
+                var data = {
+                    "sessionId": sessionId,
+                    "parameters": [
+                        {
+                            "partId": 4,
+                            "name": "position",
+                            "value": -0.5,
+                            "when": 0.1
+                        }
+                    ]
+                };
+                modalysChannel.publish("updateParameter", data);
+                console.log("35 seconds");
+            }
+
+            function noteE() {
+                var data = {
+                    "sessionId": sessionId,
+                    "parameters": [
+                        {
+                            "partId": 5,
+                            "name": "position",
+                            "value": -0.5,
+                            "when": 0.1
+                        }
+                    ]
+                };
+                modalysChannel.publish("updateParameter", data);
+                console.log("45 seconds");
+            }
+
+            function noteF() {
+                var data = {
+                    "sessionId": sessionId,
+                    "parameters": [
+                        {
+                            "partId": 6,
+                            "name": "position",
+                            "value": -0.5,
+                            "when": 0.1
+                        }
+                    ]
+                };
+                modalysChannel.publish("updateParameter", data);
+                console.log("55 seconds");
+            }
+
+
+        }
+        </script>
+
+</body>
+</html>

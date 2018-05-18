@@ -1,5 +1,12 @@
 class AirGuitar {
-	constructor(world, avatar, modalysChannel, sessionId) {
+	constructor(world, avatar, modalysChannel, sessionId, mirror, ID) {
+    this.ID = ID;
+    if (this.mirror) {
+      this.mirror = 1;
+    }
+    else {
+      this.mirror = -1;
+    }
     this.avatar = avatar;        
     this.sessionId = sessionId;
     this.JointType = Object.freeze({
@@ -41,21 +48,17 @@ class AirGuitar {
     this.inverseJointType = swap(this.JointType);
 
     this.world = world;
-    this.inWorld = false;
-    this.createSoundSource();
-    this.appeared = false;
+    this.inScene = false;
+    //this.createSoundSource();
     this.previousTime = Date.now();
     this.refreshTime = 200;
     this.previousUp = false;
-	    //moved loading to the constructor.
-    var img = new THREE.MeshBasicMaterial({ //CHANGED to MeshBasicMaterial
-        map:THREE.ImageUtils.loadTexture('guitar_2.png'),
-        transparent: true,
-        opacity: 0.8
-    });
-    img.crossOrigin = "anonymous";
-    img.map.needsUpdate = true; //ADDED
-    this.guitar = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 1.5),img);
+    this.length = 0.6;
+    this.createGuitar(); // create guitar
+    this.createColorLine(); // create color cubes and texts
+    // aggregate all to single group
+
+    this.previousY = 0;
     this.modalysChannel = modalysChannel;
     this.sessionId = sessionId;
     this.value = [];
@@ -63,8 +66,6 @@ class AirGuitar {
     {
         this.value[i] = 0.5; //0.5 before being plucked up, -0.5 before being plucked down.
     }
-    console.log(this.modalysChannel);
-    console.log(sessionId);
   }
 
   createSoundSource() {
@@ -77,39 +78,140 @@ class AirGuitar {
 
     //needs either a refreshGuitar method or some either/or dep. on whether the object has been initialized.
   refreshGuitar(data) {
-      if (this.inWorld)
-      {
-          if (!this.appeared)
-         {
-              this.world.scene.add(this.guitar);
-              this.appeared = true;
-          }
+        this.guitar.position.y = data.y+0.2;
+        this.guitar.position.x = 0.1 + data.x * this.mirror;
+        this.guitar.position.z = data.z - 1.8;
 
-          //in any case...
-          this.guitar.rotation.y = Math.PI;
-          this.guitar.position.x = data.x;
-          this.guitar.position.z = data.z - 1.8;
-          this.guitar.overdraw = true;
-      }
+        this.textGroup.position.x = data.x * this.mirror + 0.08 + 0.1;
+        this.textGroup.position.y = data.y - 0.1 + 0.1;
+        this.textGroup.position.z = data.z - 1.82;
+
+        this.colorGroup.position.x = data.x * this.mirror - 0.01 + 0.1 ;
+        this.colorGroup.position.y = data.y + 0.02 + 0.1;
+        this.colorGroup.position.z = data.z - 1.8;
   }
 
   
-  add_to_world() {
-    if (!this.inWorld) {
-      this.inWorld = true;      
+  addToScene() {
+    if (!this.inScene) {
+      this.world.scene.add(this.guitar);
+      this.world.scene.add(this.colorGroup);
+      this.world.scene.add(this.textGroup);    
+      this.inScene = true;  
     }
   }
   
-  remove_from_world() {
-    if (this.inWorld) {
+  removeFromScene() {
+    if (this.inScene) {
       this.world.scene.remove(this.guitar);
-      this.inWorld = false;      
-      this.appeared = false;
+      this.world.scene.remove(this.colorGroup);
+      this.world.scene.remove(this.textGroup);
+      this.inScene = false;      
     }
   }
   
 
-	refresh(data) {
+  createGuitar() {
+    var img = new THREE.MeshBasicMaterial({ //CHANGED to MeshBasicMaterial
+        map:THREE.ImageUtils.loadTexture('guitar_3.png'),
+        transparent: true,
+        opacity: 0.8
+    });
+    img.crossOrigin = "anonymous";
+
+    img.map.needsUpdate = true; //ADDED
+
+    // plane
+    this.guitar = new THREE.Mesh(new THREE.PlaneGeometry(3, 2),img);
+    this.guitar.rotation.x = Math.PI;
+    this.guitar.rotation.z = Math.PI;
+    this.guitar.overdraw = true;
+
+  }
+
+  createColorLine() {
+    var num_segments = 5;
+
+    var max_dist = this.length;
+
+    var cube_height = max_dist/num_segments;
+    var cube_depth = 0.1;
+    var cube_length = 0.045;
+
+    var i = 0;
+
+    var geometry = new THREE.BoxGeometry( cube_length, cube_height, cube_depth );
+
+    var colors = [0xFFFA0D,0xE8760C,0xFF00A4,0x0C19E8,0x00FFB5, 0xA211E8, 0x0692FF, 0xFF3906];
+    var notes = ["A", "B", "C", "D", "E", "F", "G", "A"];
+
+    var group = new THREE.Group();
+
+    this.colorLines = [];
+
+    for (i=0;i<num_segments;i++) {
+      // add box
+      var material = new THREE.MeshBasicMaterial( {transparent: true, opacity: 0.7, color: colors[i]} );
+      this.colorLines.push(new THREE.Mesh( geometry, material));
+      this.colorLines[i].position.x = -0.04;
+      this.colorLines[i].position.z = -0.1;
+      this.colorLines[i].position.y = i*cube_height + cube_height/2;
+      group.add(this.colorLines[i]);
+      // add note
+
+      // var line_material = new THREE.LineBasicMaterial({
+      //   color: 0x0000ff
+      // });
+
+      // var line_geometry = new THREE.Geometry();
+      // line_geometry.vertices.push(
+      //   new THREE.Vector3( -0.2, 0, 0.1 ),
+      //   new THREE.Vector3( -0.2, cube_height, 0.1 )
+      // );
+
+      // var line = new THREE.Line( line_geometry, line_material );
+      // this.world.scene.add( line )
+
+    }
+
+    group.rotation.z = -56*Math.PI/180;
+    this.colorGroup = group;
+
+
+    var loader = new THREE.FontLoader();
+
+    var that = this;
+    console.log("A");
+    loader.load('helvetiker_regular.typeface.json', function (font) {
+      if (!that.notes) {
+      var textGroup = new THREE.Group();
+      console.log("B");
+        that.notes = 5;
+        for (i=0;i<num_segments;i++) {
+
+          var textGeometry = new THREE.TextGeometry( notes[i], {
+            font: font,
+            size: 0.04,
+            height: 0.04
+          } );
+          var text = new THREE.Mesh(textGeometry,  new THREE.MeshBasicMaterial( {color: 0x000000} ));
+          text.scale.x = -1;
+          text.position.x = -0.17;
+          text.position.z = -0.2;
+          text.position.y = cube_height*i+0.02;
+          textGroup.add(text);
+          // that.world.scene.add(text);
+        }        
+      textGroup.rotation.z = -56*Math.PI/180;
+      textGroup.position.y = 0.12;
+      textGroup.position.x += 0.08;
+        that.textGroup = textGroup;
+      }
+
+    });
+  }
+ 
+	refreshSound(data) {
 
       var xLH3DPos = data.joints[this.inverseJointType["HandLeft"]].x;
       var yLH3DPos = data.joints[this.inverseJointType["HandLeft"]].y;
@@ -141,17 +243,22 @@ class AirGuitar {
       var yN3DPos = data.joints[this.inverseJointType["Neck"]].y;
       var zN3DPos = data.joints[this.inverseJointType["Neck"]].z;
 
+      //var vol = Math.abs(0.04/zSB3DPos);
+      var vol = Math.max(0.8*Math.abs(yRH3DPos - this.previousY),0.01);
+      this.previousY = yRH3DPos;
+
       var max_dist = Math.abs(yN3DPos - ySB3DPos);
-      var midposUD = ySB3DPos + max_dist / 3.0;
-      var guitar_angle = 45;
-      max_dist = max_dist/Math.cos(guitar_angle);
-      var lefthandposY = (Math.abs(yLH3DPos - ySB3DPos) / max_dist);
-      var lefthandposX = (Math.abs(xLH3DPos - xSB3DPos) / (5.0*max_dist));
+      var midposUD = ySB3DPos + max_dist / 6.0;
+      // var guitar_angle = 56;
 
-//      var rightVel = Math.abs(rightYprev - yRH3DPos);
+      // max_dist = max_dist/Math.cos(guitar_angle);
 
-      var lefthandpos = Math.sqrt(Math.pow(yLH3DPos - ySB3DPos,2) + Math.pow(xLH3DPos - xSB3DPos,2)) / max_dist;
+      var step = this.length/5;
 
+      var lefthandpos = Math.sqrt(Math.pow(yLH3DPos - (ySB3DPos+0.02),2) + Math.pow(xLH3DPos - (xSB3DPos-0.01),2));
+
+      // console.log(lefthandpos, step, Math.floor(lefthandpos/step));
+      lefthandpos = Math.floor(lefthandpos/step);
       // check if we passed the midpoint
       var play = false;
       if (yRH3DPos < midposUD)
@@ -172,66 +279,15 @@ class AirGuitar {
       }
 
 
-        var RightX = yRH3DPos - midposUD;
-//        var RightXVel = rightVel;
-        var LeftX = lefthandposX;
-        var LeftY = lefthandpos;
-        var headX = xH3DPos;
-        var headY = yH3DPos;
-        var rightHandX = xRH3DPos;
-        var rightHandY = yRH3DPos;
+        var bendQuanto = lefthandpos;
 
 
         var pentatonic = [0, 2, 4, 7, 9, 12];
 
 
-        var bendQuantoY = Math.ceil(6*LeftY); //hexatonic.
-        var bendQuantoX = Math.round(LeftX);
-
-        var bendQuanto = bendQuantoY;
-
-
-        //if (LeftY >= 0 && LeftY <=0.2) {
-        //  bendQuanto = 1;
-        //}
-        // else if (LeftY <= 0.4) {
-        //  bendQuanto = 2;
-        //}
-        //else if (LeftY <= 0.6) {
-        //  bendQuanto = 3;
-        //}
-        //else if (LeftY <= 0.8) {
-        //  bendQuanto = 4;
-        //}
-        //else if (LeftY <= 1.0) {
-        //  bendQuanto = 5;
-        //}
-
-
-        // var bendQuantoY = Math.round(LeftY/0.166);
-        // var bendQuantoX = Math.round(LeftX);
+        // var bendQuantoY = Math.ceil(6*LeftY); //hexatonic.
 
         // var bendQuanto = bendQuantoY;
-
-        // if (LeftY >= 0 && LeftY <=0.15) {
-        //   bendQuanto = 1;
-        // }
-        //  else if (LeftY <= 0.3) {
-        //   bendQuanto = 2;
-        // }
-        // else if (LeftY <= 0.45) {
-        //   bendQuanto = 3;
-        // }
-        // else if (LeftY <= 0.6) {
-        //   bendQuanto = 4;
-        // }
-        // else if (LeftY <= 0.75) {
-        //   bendQuanto = 5;
-        // }
-        // else if (LeftY <= 0.9) {
-        //   bendQuanto = 6;
-        // }
-        // //
 
 
         if (bendQuanto < 0 || bendQuanto > 6){
@@ -239,15 +295,14 @@ class AirGuitar {
           return;
         }
         
-
-              //   document.getElementById("RightX").innerHTML = RightX.toPrecision(4);
-              //   document.getElementById("LeftX").innerHTML = LeftX.toPrecision(4);
-              //   document.getElementById("LeftY").innerHTML = LeftY.toPrecision(4);
-              //   document.getElementById("GestureDirection").innerHTML = GestureDirection;
-
-              // document.getElementById("bendQuanto").innerHTML = bendQuanto;     
-
+        $(`#bendQuanto_${this.ID}`).html(bendQuanto);     
          this.avatar.refreshHands(bendQuanto);        
+        
+        if (!play) {
+          return;
+        }
+        
+
 
         if (Date.now() - this.previousTime < this.refreshTime) {
           return;
@@ -255,19 +310,47 @@ class AirGuitar {
         else {
           this.previousTime = Date.now();
         }
-        
-        if (!play) {
-          return;
-        }
+
 
         this.pluck(bendQuanto);
+        //this.pluckAudiofont(bendQuanto);
 	}
+
+  pluckAudiofont(bendQuanto) {
+
+    if (bendQuanto == 5) {
+      this.player.queueWaveTable(this.audioContext, this.audioContext.destination
+        , _tone_0300_LesPaul_sf2, 0, 12*4+2, 1);
+    }
+    else if (bendQuanto == 4) {
+      this.player.queueWaveTable(this.audioContext, this.audioContext.destination
+        , _tone_0300_LesPaul_sf2, 0, 12*4+5, 1);
+    }
+    else if (bendQuanto == 3) {
+      this.player.queueWaveTable(this.audioContext, this.audioContext.destination
+        , _tone_0300_LesPaul_sf2, 0, 12*4+7, 1);
+    }
+    else if (bendQuanto == 2) {
+      this.player.queueWaveTable(this.audioContext, this.audioContext.destination
+        , _tone_0300_LesPaul_sf2, 0, 12*4+8, 1);
+    }
+
+  }
 
 	pluck(bendQuanto) {
       this.value[bendQuanto] = this.value[bendQuanto] * (-1); //inverting the pluck direction after each call.
-      console.log(bendQuanto);
-      console.log(this.value[bendQuanto]);
-	    var data = {
+      var data = { //likely can be commented out
+        "sessionId": this.sessionId,
+        "parameters": [
+        {
+          "partId": bendQuanto,
+          "name": "listeningpoint",
+          "value": 0.3,
+          "when": 0.1
+        }]
+      }
+      this.modalysChannel.publish("updateParameter",data);
+      var data = {
 	        "sessionId" : this.sessionId,
 	        "parameters" : [
               {
@@ -275,9 +358,12 @@ class AirGuitar {
                   "name" : "position",
                   "value": this.value[bendQuanto],
                   "when" : 0.1
+
               }
 	        ]
 	    }
       this.modalysChannel.publish("updateParameter",data);
+      
+      //this.tension = this.tension - 10;
     }
 }

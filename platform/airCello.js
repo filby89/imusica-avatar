@@ -1,7 +1,13 @@
 class AirCello {
-	constructor(world, avatar) {
+	constructor(world, avatar, mirror, ID) {
+    this.ID = ID;
     this.avatar = avatar;        
-
+    if (this.mirror) {
+      this.mirror = 1;
+    }
+    else {
+      this.mirror = -1;
+    }
     this.JointType = Object.freeze({
       0: 'SpineBase',
       1: 'SpineMid',
@@ -46,7 +52,7 @@ class AirCello {
     this.refreshTime = 200;
     this.previousLeft = false;
     this.world = world;
-    this.inWorld = false;
+    this.inScene = false;
     this.colored  =false; //similarly, for the colorline creator.
     this.currentNote = null;
 
@@ -54,7 +60,12 @@ class AirCello {
 
     this.previousX = 0;
 
+    this.num_segments = 8;
+    this.height = 0.8;
+
     this.createCello();
+    this.createColorLine();
+
   }
 
   createSoundSource() {
@@ -69,178 +80,61 @@ class AirCello {
     var img = new THREE.MeshBasicMaterial({ //CHANGED to MeshBasicMaterial
         map:THREE.ImageUtils.loadTexture('Cello.png'),
         transparent: true,
-        opacity: 0.8
+        opacity: 0.6
     });
     img.crossOrigin = "anonymous";
 
     img.map.needsUpdate = true; //ADDED
 
-    // plane
     this.cello = new THREE.Mesh(new THREE.PlaneGeometry(2, 2),img);
-    // this.cello.rotation.y = Math.PI;
-    // this.cello.position.x = -0.2;
-    // this.cello.position.z = 0;
-    // this.cello.overdraw = true;
+    this.cello.rotation.y = Math.PI;
   }
 
   refreshCello(data) {
-      if (this.inWorld)
-      {
-          if (!this.appeared)
-          {
-              this.world.scene.add(this.cello);
-              this.appeared = true;
-          }
-          // plane
-          this.cello.rotation.y = Math.PI;
-          this.cello.position.x = data.x - 0.2;
-          this.cello.position.z = data.z - 1.8;
-          this.cello.overdraw = true;
-
-      }
-  }
-  
-  add_to_world() {
-    if (!this.inWorld) {
-      this.inWorld = true;      
-    }
-  }
-  
-  remove_from_world() {
-    if (this.inWorld) {
-      this.world.scene.remove(this.cello);
-      this.inWorld = false;  
-      this.appeared = false;
-      this.colored = false;
-      for (var i = 0; i< 8; i++)
-        this.world.scene.remove(this.colorLines[i]);
-    }
-  }
-  
-
-	refresh(data) {
-
-      var yLH3DPos = data.joints[this.inverseJointType["HandLeft"]].y;
-
-      var xRH3DPos = data.joints[this.inverseJointType["HandRight"]].x;
-      
-      var xSB3DPos = data.joints[this.inverseJointType["SpineBase"]].x;
-
-      var ySB3DPos = data.joints[this.inverseJointType["SpineBase"]].y;
-
-      var yH3DPos = data.joints[this.inverseJointType["Head"]].y;
-
-      var max_dist = Math.abs(yH3DPos - ySB3DPos);
-
-      var midposLR = xSB3DPos;
-
-      var LeftY = (Math.abs(yLH3DPos - ySB3DPos) / max_dist);
-
-      var play = false;
-      
-      this.createColorLine(data);
-      var velocity_x = xRH3DPos - this.previousX;
-      this.previousX = xRH3DPos;
-      document.getElementById("GestureDirection").innerHTML = velocity_x.toPrecision(4);
-
-      if (Math.abs(velocity_x) > 0.001) { //xamilo dn einai? apo oti thymamai apo diplo at least
-        if (this.direction == Math.sign(velocity_x)) {
-          play = false;
-        }
-        else {
-          this.direction = Math.sign(velocity_x);
-          play = true;
-        }
-      }
-      else {
-        if (!this.envelope) {
-          this.envelope.cancel();
-        }
-      }
-
-      // if (xRH3DPos < midposLR)
-      // {
-      //   if (this.previousLeft == true)
-      //     {
-      //       play = true;
-      //     }
-      //     this.previousLeft = false;
-      // }
-      // else if (xRH3DPos > midposLR)
-      // {
-      //   if (this.previousLeft == false)
-      //   {
-      //     play = true;
-      //   }
-      //   this.previousLeft = true;
-      // }
-
-      var step = 1/8;
-
-
-
-      var bendQuanto = Math.floor(LeftY/step)+1;
-
-//                 document.getElementById("RightX").innerHTML = RightX.toPrecision(4);
-//                 document.getElementById("LeftX").innerHTML = LeftX.toPrecision(4);
-//                 document.getElementById("LeftY").innerHTML = LeftY.toPrecision(4);
-//                 document.getElementById("GestureDirection").innerHTML = GestureDirection;
-// //                document.getElementById("RightXVel").innerHTML = RightXVel.toPrecision(4);
-
-              document.getElementById("bendQuanto").innerHTML = bendQuanto;     
-
-        this.avatar.refreshHands(bendQuanto, 8);        
-        if (play) {
-          // console.log("Bendquanto: ", bendQuanto);
-        }
-        if (Date.now() - this.previousTime < this.refreshTime) {
-          return;
-        }
-        else {
-          this.previousTime = Date.now();
-        }
-        
-        if (!play) {
-          return;
-        }
-        
-        var audio = null;
-
-        var notes = [48,50,52,53,55,57,59,60];
-        // var notes = [60,62,64,65,67,69,71,72];
-        var note_to_play = notes[bendQuanto-1];
-
-        var selectedPreset = _tone_0430_SBLive_sf2;
-
-        for (var i = 0; i < selectedPreset.zones.length; i++) {
-                selectedPreset.zones[i].ahdsr = [{
-                    duration: 10,
-                    volume: 1
-                  }];
-                }
-
-        if (note_to_play!=this.currentNote) {
-          if (this.envelope) {
-            this.envelope.cancel();
-          }
-          this.envelope = this.player.queueWaveTable(this.audioContext, this.audioContext.destination
-            , selectedPreset, 0, note_to_play, 10);
-          // console.log(this.envelope);
-          this.currentNote = note_to_play;
-        }
-      }
-
-  createColorLine(data) {
-    var num_segments = 8;
 
     // spine base is the center!
 
-    var ySB3DPos = Math.abs(data.joints[this.inverseJointType["SpineBase"]].y-data.joints[this.inverseJointType["SpineBase"]].y);
+    // var ySB3DPos = Math.abs(data.joints[this.inverseJointType["SpineBase"]].y-data.joints[this.inverseJointType["SpineBase"]].y);
 
-    var yH3DPos = Math.abs(data.joints[this.inverseJointType["Head"]].y- data.joints[this.inverseJointType["SpineBase"]].y);
+    // var yH3DPos = Math.abs(data.joints[this.inverseJointType["Head"]].y- data.joints[this.inverseJointType["SpineBase"]].y);
 
-    var max_dist = Math.abs(yH3DPos - ySB3DPos);
-    var cube_height = max_dist/num_segments;
+    // var max_dist = Math.abs(yH3DPos - ySB3DPos);
+
+      this.textGroup.position.x = data.x * this.mirror + 0.4;
+      this.textGroup.position.y = data.y + 0.1;
+      this.textGroup.position.z = data.z - 1.82;
+
+      this.colorGroup.position.x = data.x * this.mirror + 0.2;
+      this.colorGroup.position.y = data.y + 0.07;
+      this.colorGroup.position.z = data.z - 1.81;
+
+      this.cello.position.x = data.x * this.mirror + 0.2;
+      this.cello.position.z = data.z - 1.8;
+      this.cello.overdraw = true;
+  }
+  
+  addToScene() {
+    if (!this.inScene) {
+      this.world.scene.add(this.cello);
+      this.world.scene.add(this.colorGroup);
+      this.world.scene.add(this.textGroup);    
+      this.inScene = true;  
+    }
+  }
+  
+  removeFromScene() {
+    if (this.inScene) {
+      this.world.scene.remove(this.cello);
+      this.world.scene.remove(this.colorGroup);
+      this.world.scene.remove(this.textGroup);
+      this.inScene = false;      
+    }
+  }
+  
+
+  createColorLine() {
+
+    var cube_height = this.height/this.num_segments;
 
     var cube_depth = 0.1;
     var cube_length = 0.11;
@@ -252,58 +146,25 @@ class AirCello {
     var colors = [0xFFFA0D,0xE8760C,0xFF00A4,0x0C19E8,0x00FFB5, 0xA211E8, 0x0692FF, 0xFF3906];
     var notes = ["A", "B", "C", "D", "E", "F", "G", "A"];
 
+    this.colorGroup = new THREE.Group();
 
-    if (!this.colored)
-    {
-        this.colorLines = [];
-        this.colored = true;
-        for (i=0;i<8;i++) {
-            // add box
-            var material = new THREE.MeshBasicMaterial( {transparent: true, opacity: 0.7, color: colors[i]} );
-            this.colorLines.push(new THREE.Mesh( geometry, material));
-            this.colorLines[i].position.x = data.joints[this.inverseJointType["SpineBase"]].x-0.2;
-            this.colorLines[i].position.z = data.joints[this.inverseJointType["SpineBase"]].z-1.8;
-            //this.colorLines[i].position.x = -0.2;
-            //this.colorLines[i].position.z = 0.2;
-            this.colorLines[i].position.y = i*cube_height + cube_height/2;
-            this.world.scene.add(this.colorLines[i]);
-            // add note
-
-            // var line_material = new THREE.LineBasicMaterial({
-            //   color: 0x0000ff
-            // });
-
-            // var line_geometry = new THREE.Geometry();
-            // line_geometry.vertices.push(
-            //   new THREE.Vector3( -0.2, 0, 0.1 ),
-            //   new THREE.Vector3( -0.2, cube_height, 0.1 )
-            // );
-
-            // var line = new THREE.Line( line_geometry, line_material );
-            // this.world.scene.add( line )
-
-            // }
-        }
-    }
-    else{
-        for(var i = 0; i < 8; i++)
-        {
-            this.colorLines[i].position.x = data.joints[this.inverseJointType["SpineBase"]].x-0.2;
-            this.colorLines[i].position.z = data.joints[this.inverseJointType["SpineBase"]].z-1.8;
-            //this.colorLines[i].position.x = -0.2;
-            //this.colorLines[i].position.z = 0.2;
-            this.colorLines[i].position.y = i*cube_height + cube_height/2;
-        }
-    }
+      this.colorLines = [];
+      for (i=0;i<this.num_segments;i++) {
+          // add box
+          var material = new THREE.MeshBasicMaterial( {transparent: true, opacity: 0.7, color: colors[i]} );
+          this.colorLines.push(new THREE.Mesh( geometry, material));
+          this.colorLines[i].position.y = i*cube_height + cube_height/2;
+          this.colorGroup.add(this.colorLines[i]);
+      }
 
     var loader = new THREE.FontLoader();
+
+    this.textGroup = new THREE.Group();
 
     var that = this;
 
     loader.load('helvetiker_regular.typeface.json', function (font) {
-      if (!that.notes) {
-        that.notes = 5;
-        for (i=0;i<num_segments;i++) {
+        for (i=0;i<that.num_segments;i++) {
 
           var textGeometry = new THREE.TextGeometry( notes[i], {
             font: font,
@@ -314,14 +175,103 @@ class AirCello {
           text.scale.x = -1;
           text.position.x = -0.17;
           text.position.z = -0.2;
-          text.position.y = cube_height*i+0.02;
-          that.world.scene.add(text);
-        }        
+          text.position.y = cube_height*i;
+          that.textGroup.add(text);
       }
 
     });
 
-
-
   }
+
+	refreshSound(data) {
+
+      var yLH3DPos = data.joints[this.inverseJointType["HandLeft"]].y;
+
+      var xRH3DPos = data.joints[this.inverseJointType["HandRight"]].x;
+      
+      var xSB3DPos = data.joints[this.inverseJointType["SpineBase"]].x;
+
+      var ySB3DPos = data.joints[this.inverseJointType["SpineBase"]].y;
+
+      var yH3DPos = data.joints[this.inverseJointType["Head"]].y;
+
+      // var max_dist = Math.abs(yH3DPos - ySB3DPos);
+
+      var midposLR = xSB3DPos;
+
+      var LeftY = ((yLH3DPos - (ySB3DPos + 0.07) ));
+
+      var play = false;
+      
+      var velocity_x = xRH3DPos - this.previousX;
+      this.previousX = xRH3DPos;
+      // document.getElementById("GestureDirection").innerHTML = velocity_x.toPrecision(4);
+
+
+      // note 
+      var step = this.height/this.num_segments;
+
+      var bendQuanto = Math.floor(LeftY/step)+1;
+
+      $(`#bendQuanto_${this.ID}`).html(bendQuanto);     
+      $(`#RH_x_vel_${this.ID}`).html(velocity_x.toPrecision(4));     
+
+      this.avatar.refreshHands(bendQuanto, 8);        
+
+      var audio = null;
+
+      var notes = [48,50,52,53,55,57,59,60];
+
+      var note_to_play = notes[bendQuanto-1];
+
+      if (Math.abs(velocity_x) > 0.005) { //xamilo dn einai? apo oti thymamai apo diplo at least 
+        if (this.direction == Math.sign(velocity_x)) {
+          play = false;
+        }
+        else {
+          this.direction = Math.sign(velocity_x);
+          play = true;
+        }
+        if (note_to_play != this.currentNote) {
+          play = true;
+        }
+      }
+      else {
+        if (this.envelope) {
+          this.envelope.cancel();
+        }
+      }
+
+
+
+      if (!play) {
+        return;
+      }
+      
+      if (Date.now() - this.previousTime < this.refreshTime) {
+        return;
+      }
+      else {
+        this.previousTime = Date.now();
+      }
+      
+
+        var selectedPreset = _tone_0430_SBLive_sf2;
+
+        for (var i = 0; i < selectedPreset.zones.length; i++) {
+                selectedPreset.zones[i].ahdsr = [{
+                    duration: 10,
+                    volume: 1
+                  }];
+                }
+
+          if (this.envelope) {
+            this.envelope.cancel();
+          }
+          this.envelope = this.player.queueWaveTable(this.audioContext, this.audioContext.destination
+            , selectedPreset, 0, note_to_play, 10);
+          // console.log(this.envelope);
+          this.currentNote = note_to_play;
+      }
+
 }

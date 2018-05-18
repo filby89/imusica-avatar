@@ -44,7 +44,7 @@ class interactionWorld{
 		var rotX = (90 * Math.PI)/180;
 
 		floor.rotation.x = rotX;
-		floor.position.y = -0.9;
+		floor.position.y = -1.1;
 		this.scene.add( floor );
 
 		//wall 1
@@ -56,15 +56,15 @@ class interactionWorld{
 		var wall3 = new THREE.Mesh( geometry, material );
 
 		wall1.position.x = -2.5;
-		wall1.position.y = 0.6;
+		wall1.position.y = 0.4;
 		wall1.rotation.y = (90*Math.PI)/180;
 
 		wall2.position.x = 2.5;
-		wall2.position.y = 0.6;
+		wall2.position.y = 0.4;
 		wall2.rotation.y = (90*Math.PI)/180;
 
 		wall3.position.z = 2.5;
-		wall3.position.y = 0.6;
+		wall3.position.y = 0.4;
 
 		this.scene.add( wall1 );
 		this.scene.add( wall2 );

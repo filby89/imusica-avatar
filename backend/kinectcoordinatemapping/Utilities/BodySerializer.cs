@@ -78,18 +78,7 @@ namespace KinectCoordinateMapping
 
                 foreach (Joint joint in skeleton.Joints.Values)
                 {
-                    //Joint currentJoint = new Joint();
-                    /*if (joint.JointType != JointType.Head && joint.JointType != JointType.Neck && joint.JointType != JointType.SpineBase
-                        && joint.JointType != JointType.SpineMid && joint.JointType != JointType.SpineShoulder
-                        && joint.JointType != JointType.HandRight && joint.JointType != JointType.HandLeft)*/
-
-                    //use if only need to send those joints
-                    //if (joint.JointType != JointType.Neck && joint.JointType != JointType.SpineBase
-                    //      && joint.JointType != JointType.HandRight && joint.JointType != JointType.HandLeft)
-                    //
-                    //continue;
-
-
+                    
                     CameraSpacePoint jointPosition = joint.Position;
                     Point point = new Point();
 

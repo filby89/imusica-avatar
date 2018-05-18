@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Modalys plate hit with a felt mallet</title>
+  <script src="jquery-3.2.1.min.js"></script>
+  <script src="jcanvas.min.js"></script>
+  <script src="lodash.min.js"></script>
+  <script src="postal.min.js"></script>
+  <script src="modalys.js"></script>
+  <script>
+    var notes = [60, 62, 64, 65, 67, 69, 71, 72];
+    var hues = [0, 45, 65, 110, 190, 225, 270, 315]
+
+    var midi;
+    var inputs;
+    var input;
+
+    var modalysChannel = postal.channel("modalys");
+    var sessionId;
+
+    $("document").ready(function() {
+      Modalys.isready.then(function() {
+        var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        Modalys.init(audioContext);
+        Modalys.output.connect(audioContext.destination);
+
+      var $canvas = $('#xyloCanvas');
+      var parts = [];
+
+      for (var i = 0; i < notes.length; i++) {
+        let partId = 0 + notes[i];
+
+        $canvas.drawRect({
+          layer: true,
+          fillStyle: 'hsl(' + hues[i] + ', 80%, 50%)',
+          x: 70 * i,
+          y: 10 * i,
+          width: 60,
+          height: 400 - 20 * i,
+          fromCenter: false,
+          mousedown: function(layer) {
+            var hit = [];
+            hit[0] = Math.max(0.001, Math.min(0.999, (layer.eventX - layer.x) / layer.width));
+            hit[1] = Math.max(0.001, Math.min(0.999, (layer.eventY - layer.y) / layer.height));
+            //console.log("x : " + hit[0] + ", y : " + hit[1]);
+
+            var data = { 
+              "sessionId" : sessionId,
+              "parameters" : [
+                {
+                  "partId" : partId,
+                  "name" : "impactCoords",
+                  "value" : hit,
+                  "when" : 0.01
+                }
+              ]
+            };
+            modalysChannel.publish("updateParameter", data);
+            var timeoutId = setTimeout(function() {
+              var data = {
+                "sessionId" : sessionId,
+                "parameters" : [
+                  {
+                    "partId" : partId,
+                    "name" : "malletPosition",
+                    "value" : 0.0,
+                    "when" : 0.01
+                  }
+                ]
+              };
+              modalysChannel.publish("updateParameter", data);
+              timeoutId = setTimeout(function() {
+                clearTimeout(timeoutId);
+              }, 20);
+            }, 20);
+          },
+          mouseup: function(layer) {
+            var data = {
+              "sessionId" : sessionId,
+              "parameters" : [
+                {
+                  "partId" : partId,
+                  "name" : "malletPosition",
+                  "value" : 0.25,
+                  "when" : 0.01
+                }
+              ]
+            };
+            modalysChannel.publish("updateParameter", data);
+          }
+        });        
+
+        var pitch = Math.pow(2, (notes[i] - 69) / 12) * 440;
+        parts.push({
+          "partId" : partId,
+          "physicalParameters" : {
+            "pitch" : pitch
+          }
+        });
+
+      }
+
+      modalysChannel.publish("play", {
+        "requestId": "123456",
+        "instrumentType": "bar",
+        "name": "Pentatonic percussion",
+        "parts": parts
+      });
+
+      function malletDown(note) {
+        var data = {
+          "sessionId" : sessionId,
+          "parameters" : [
+            {
+              "partId" : note,
+              "name" : "malletPosition",
+              "value" : 0.0,
+              "when" : 0.01
+            }
+          ]
+        };
+        modalysChannel.publish("updateParameter", data);
+      }
+
+      function malletUp(note) {
+        var data = {
+          "sessionId" : sessionId,
+          "parameters" : [
+            {
+              "partId" : note,
+              "name" : "malletPosition",
+              "value" : 0.25,
+              "when" : 0.01
+            }
+          ]
+        };
+        modalysChannel.publish("updateParameter", data);
+      }
+
+      $(document).keydown(function(e) {
+        var i = e.which - 49;
+        if (i >= 0 && i < notes.length) {
+          malletDown(notes[i]);
+          e.preventDefault();          
+        }
+      }).keyup(function(e) {
+        var i = e.which - 49;
+        if (i >= 0 && i < notes.length) {
+          malletUp(notes[i]);
+          e.preventDefault();          
+        }
+      });
+
+
+      var log = false;
+      $("#logProcessTime").click(function() {
+        log = !log;
+        if (log) {
+          Modalys.startLogProcessTime(document.getElementById("logDiv"));
+          $(this).text("Stop logging process time");
+        } else {
+          Modalys.stopLogProcessTime();
+          $(this).text("Log process time");
+        }
+      });
+
+      modalysChannel.subscribe("notification", function(data) {
+        if (data.hasOwnProperty('status') && data.status == 'ready') {
+          sessionId = data.sessionId;
+        }
+        console.log(data);
+      });
+
+      function refreshMidiInputs() {
+        navigator.requestMIDIAccess().then( onSuccess, onFailure );
+      }
+
+      function onSuccess( access ) {
+        midi = access;
+        inputs = midi.inputs;
+
+        var midiInputsOptions = "<option value=\"\">None</option>";
+        inputs.forEach(function(element) {
+          midiInputsOptions += "<option value=\"" + element.id + "\">" + element.name + "</option>";
+        });
+        document.getElementById("midiInputs").innerHTML = midiInputsOptions;        
+      }
+
+      function onFailure( err ) {
+        console.log("MIDI Init Error. Error code: " + err.code);
+      }
+
+      document.getElementById("midiInputs").onchange = function(e) {
+        if (input) {
+          input.onmidimessage = null;
+          input.close();
+        }
+        var id = this.options[this.selectedIndex].value;
+        if (id != "") {
+          input = inputs.get(id);
+          input.onmidimessage = handleMIDIMessage;
+        }
+      };
+
+      function handleMIDIMessage(event){
+        var statushigh = event.data[0] >> 4;
+
+        if (statushigh == 9) { // note on
+          var key = event.data[1] & 0x7F;
+          //console.log(key);
+          if (notes.indexOf(key) > -1) {
+            malletDown(key);
+          }
+        } else if (statushigh == 8) { // note off
+          var key = event.data[1] & 0x7F;
+          if (notes.indexOf(key) > -1) {
+            malletUp(key);
+          }
+        }
+      }
+
+      refreshMidiInputs();
+      document.getElementById("refreshMidi").onclick = refreshMidiInputs;
+    });
+    });
+	</script>
+
+</head>
+
+<body onload="document.getElementById('version').innerHTML = 'modalys.js version: ' + Modalys.version;">
+  <h1>modalys.js live example: eight bars tuned in C major</h1>
+  <h2>Press and release keys 1 to 8, or click on a bar (both ways are speed-sensitive...)</h2>
+  <p id="version" style="font-size:10pt;font-family: monospace;"></p>
+
+  <canvas id="xyloCanvas" width="800" height="400" style="width: 800px; height: 400px;"></canvas>
+
+  <p id="footer">
+    <button id="logProcessTime">Log process time</button>
+    <div>MIDI input : <select id="midiInputs"></select><button id="refreshMidi">Refresh</button></div>
+  </p>
+  <div id="logDiv"></div>
+  <div style="border: solid 2px;padding-left: 10px;background-color: blanchedalmond;width: 750px;">
+    <h2>Bar</h2>
+
+    <h3>Physical parameters (default value)</h3>
+    <ul>
+      <li>length (1.0 m), modified by pitch (261.63 Hz)</li>
+      <li>width (0.05 m)</li>
+      <li>thickness (0.005 m)</li>
+      <li>material (=> density (7700 kg/m3), young (2.0e11 N/m2), poisson (0.31), freqLoss (0.1), constLoss (0.3))</li>
+    </ul>
+
+    <h3>Performance parameters (default value) : possible values</h3>
+    <ul>
+      <li>impactCoords ([0.5, 0.3]) : [0-1, 0-1]</li>
+      <li>malletPosition (0.25 m)</li>
+      <li>outputPoint ([0.5, 0.9]) : [0-1, 0-1]</li>
+    </ul>
+  </div>
+</body>
+</html>
