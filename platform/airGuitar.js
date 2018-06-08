@@ -1,5 +1,6 @@
 class AirGuitar {
-	constructor(world, avatar, modalysChannel, sessionId, mirror, ID) {
+	constructor(world, avatar, modalysChannel, sessionId, mirror, ID, fretboard) {
+    this.fretboard = fretboard;
     this.ID = ID;
     if (this.mirror) {
       this.mirror = 1;
@@ -49,7 +50,7 @@ class AirGuitar {
 
     this.world = world;
     this.inScene = false;
-    //this.createSoundSource();
+    this.createSoundSource();
     this.previousTime = Date.now();
     this.refreshTime = 200;
     this.previousUp = false;
@@ -66,6 +67,13 @@ class AirGuitar {
     {
         this.value[i] = 0.5; //0.5 before being plucked up, -0.5 before being plucked down.
     }
+    this.fret = [ //preset fretboard positioning for each bendquanto
+      [-1,0,2,2,2,0], //A major preset
+      [0,2,2,1,0,0],  //E major preset
+      [-1,-1,0,2,3,2],  //D major preset
+      [-1,3,2,0,1,0],  //C major preset
+      [3,2,0,0,3,3] //G major preset
+    ];
   }
 
   createSoundSource() {
@@ -143,7 +151,7 @@ class AirGuitar {
     var geometry = new THREE.BoxGeometry( cube_length, cube_height, cube_depth );
 
     var colors = [0xFFFA0D,0xE8760C,0xFF00A4,0x0C19E8,0x00FFB5, 0xA211E8, 0x0692FF, 0xFF3906];
-    var notes = ["A", "B", "C", "D", "E", "F", "G", "A"];
+    var notes = ["E", "D", "B", "A", "G", "F", "G", "A"];
 
     var group = new THREE.Group();
 
@@ -197,7 +205,7 @@ class AirGuitar {
           var text = new THREE.Mesh(textGeometry,  new THREE.MeshBasicMaterial( {color: 0x000000} ));
           text.scale.x = -1;
           text.position.x = -0.17;
-          text.position.z = -0.2;
+          text.position.z = -0.15;
           text.position.y = cube_height*i+0.02;
           textGroup.add(text);
           // that.world.scene.add(text);
@@ -290,7 +298,7 @@ class AirGuitar {
         // var bendQuanto = bendQuantoY;
 
 
-        if (bendQuanto < 0 || bendQuanto > 6){
+        if (bendQuanto < 1 || bendQuanto > 6){ //accepted values are 1-5
           bendQuanto = 0;
           return;
         }
@@ -311,59 +319,76 @@ class AirGuitar {
           this.previousTime = Date.now();
         }
 
-
-        this.pluck(bendQuanto);
-        //this.pluckAudiofont(bendQuanto);
-	}
-
-  pluckAudiofont(bendQuanto) {
-
-    if (bendQuanto == 5) {
-      this.player.queueWaveTable(this.audioContext, this.audioContext.destination
-        , _tone_0300_LesPaul_sf2, 0, 12*4+2, 1);
-    }
-    else if (bendQuanto == 4) {
-      this.player.queueWaveTable(this.audioContext, this.audioContext.destination
-        , _tone_0300_LesPaul_sf2, 0, 12*4+5, 1);
-    }
-    else if (bendQuanto == 3) {
-      this.player.queueWaveTable(this.audioContext, this.audioContext.destination
-        , _tone_0300_LesPaul_sf2, 0, 12*4+7, 1);
-    }
-    else if (bendQuanto == 2) {
-      this.player.queueWaveTable(this.audioContext, this.audioContext.destination
-        , _tone_0300_LesPaul_sf2, 0, 12*4+8, 1);
+        if (bendQuanto == 1)
+            console.log("A major");
+        else if (bendQuanto == 2)
+            console.log("E major");
+        else if (bendQuanto == 3)
+            console.log("D major");
+        else if (bendQuanto == 4)
+            console.log("C major");
+        else if (bendQuanto == 5)
+            console.log("G major");
+        //To choose between modalys/non-modalys output, just activate the respective func + comment out the other one.
+        //this.pluckAudiofont(bendQuanto); //AudioFont.
+        this.PlayChord(bendQuanto); //Modalys.
     }
 
-  }
-
-	pluck(bendQuanto) {
-      this.value[bendQuanto] = this.value[bendQuanto] * (-1); //inverting the pluck direction after each call.
-      var data = { //likely can be commented out
-        "sessionId": this.sessionId,
-        "parameters": [
+    PlayChord(bendQuanto)
+    {
+      this.fret = this.fretboard.fret;
+      console.log(this.fret);
+        var mc = this.modalysChannel;
+        var id = this.sessionId;
+        var pb = [];
+        var val = [];
+        for (var i = 0; i <6; i++)
         {
-          "partId": bendQuanto,
-          "name": "listeningpoint",
-          "value": 0.3,
-          "when": 0.1
-        }]
-      }
-      this.modalysChannel.publish("updateParameter",data);
-      var data = {
-	        "sessionId" : this.sessionId,
-	        "parameters" : [
-              {
-                  "partId": bendQuanto,
-                  "name" : "position",
-                  "value": this.value[bendQuanto],
-                  "when" : 0.1
+            pb[i] = this.fret[bendQuanto-1][i]*100; //array of desired pitchbends (100 per pos)
+            if (pb[i] != -100)
+            {
+              this.value[i] = this.value[i]*(-1); //array of pluckup/down values.
+              val[i] = this.value[i];
+            }
+        }
 
-              }
-	        ]
-	    }
-      this.modalysChannel.publish("updateParameter",data);
-      
-      //this.tension = this.tension - 10;
+        window.setTimeout(function(){Pluck(1,pb[0],val[0],id,mc)},50); //pluck each chord, given a 50 ms interval between chords
+        window.setTimeout(function(){Pluck(2,pb[1],val[1],id,mc)},100);
+        window.setTimeout(function(){Pluck(3,pb[2],val[2],id,mc)},150);
+        window.setTimeout(function(){Pluck(4,pb[3],val[3],id,mc)},200);
+        window.setTimeout(function(){Pluck(5,pb[4],val[4],id,mc)},250);
+        window.setTimeout(function(){Pluck(6,pb[5],val[5],id,mc)},300);
+
+                function Pluck(string,pitchbend,dir,id,channel)
+               {
+                    if (pitchbend == -100)
+                        return;
+                    console.log("Plucking");
+                    var data = {
+                        "sessionId": id,
+                        "parameters": [
+                        {
+                            "partId": string,
+                            "name": "pitchbend",
+                            "value": pitchbend
+                        }]
+                    };
+                    channel.publish("updateParameter", data);
+                    var data = {
+                        "sessionId": id,
+                        "parameters": [
+                        { 
+                            "partId": string,
+                            "name": "position",
+                            "value": dir,
+                            "when": 0.05
+                        }]
+                    };
+                    channel.publish("updateParameter", data);
+                }
+          //  }
+        //}
+        
     }
+	   
 }

@@ -46,11 +46,14 @@
                     Modalys.init(audioContext);
                     Modalys.output.connect(audioContext.destination);
                     console.log("Modalys should be initialized...");
+                    //var l = 1.3348;
                     var l = 1;
                     var parts = [];
+                    var value = [];
                     //initialize the guitar chords
-                    for (var i = 0; i < 6; i++) {
-                        var x = i * 0.1;
+                    for (var i = 0; i < 6; i++) { //standard tuning: E/A/D/G/B/E
+                        value[i] = 0.5;
+                        var x = i * 0.01;
                         //var y = Math.pow(0.6666, i); //.... that is not an octave diff, will likely reset to 0.943....
                         parts[i] = {
                             "partId": i + 1,
@@ -65,10 +68,14 @@
                                     "z": 0.0
                                 }],
                                 "radius": 0.001, //might edit.
-                                "tension": 94.66
+                                "tension": 661,
+                                "material": "steel"
                             }
                         }
-                        l = l/1.1225; //1.1225 to cover an octave?
+                        //l = l/1.14;
+                        l = l/1.3348; //as frequency increases
+                        if (i == 3)
+                            l = l*1.0595; //in standard tuning the 5th string is tuned 4 tones below the 4th, not 5.
 
                     }
 
@@ -88,112 +95,90 @@
                     console.log(data.sessionId);
                 }
             });
+            
+            //window.setTimeout(function(){Pluck(2,0,-0.5)},3000);
+            window.setTimeout(tune, 5000);
+            window.setTimeout(Amajor, 20000);
+            window.setTimeout(Emajor, 30000);
+            window.setTimeout(Dmajor, 40000);
+            window.setTimeout(Cmajor, 50000);
+            window.setTimeout(Gmajor, 60000);
 
-            window.setTimeout(noteA, 5000);
-            window.setTimeout(noteB, 8000);
-            window.setTimeout(noteC, 11000);
-            window.setTimeout(noteD, 14000);
-            window.setTimeout(noteE, 17000);
-            window.setTimeout(noteF, 20000);
-
-            function noteA() {
+            function tune () {
+                window.setTimeout(function(){Pluck(1,0,-0.5)},1000);
+                window.setTimeout(function(){Pluck(2,0,-0.5)},3000);
+                window.setTimeout(function(){Pluck(3,0,-0.5)},5000);
+                window.setTimeout(function(){Pluck(4,0,-0.5)},7000);
+                window.setTimeout(function(){Pluck(5,0,-0.5)},9000);
+                window.setTimeout(function(){Pluck(6,0,-0.5)},11000);
+            }
+            function Amajor() {
+                window.setTimeout(function(){Pluck(2,0,0.5)},1500);
+                window.setTimeout(function(){Pluck(3,2,0.5)},1550);
+                window.setTimeout(function(){Pluck(4,2,0.5)},1600);
+                window.setTimeout(function(){Pluck(5,2,0.5)},1650);
+                window.setTimeout(function(){Pluck(6,0,0.5)},1700);
                 console.log(sessionId);
+            }
+
+            function Emajor() {
+                window.setTimeout(function(){Pluck(1,0,0.5)},1500);
+                window.setTimeout(function(){Pluck(2,2,-0.5)},1550);
+                window.setTimeout(function(){Pluck(3,2,-0.5)},1600);
+                window.setTimeout(function(){Pluck(4,1,-0.5)},1650);
+                window.setTimeout(function(){Pluck(5,0,-0.5)},1700);
+                window.setTimeout(function(){Pluck(6,0,-0.5)},1750);
+            }
+
+            function Dmajor(){
+                window.setTimeout(function(){Pluck(3,0,0.5)},1500);
+                window.setTimeout(function(){Pluck(4,2,0.5)},1550);
+                window.setTimeout(function(){Pluck(5,3,0.5)},1600);
+                window.setTimeout(function(){Pluck(6,2,0.5)},1650);
+            }
+
+            function Cmajor(){
+                window.setTimeout(function(){Pluck(2,3,0.5)},1500);
+                window.setTimeout(function(){Pluck(3,2,-0.5)},1550);
+                window.setTimeout(function(){Pluck(4,0,-0.5)},1600);
+                window.setTimeout(function(){Pluck(5,1,-0.5)},1650);
+                window.setTimeout(function(){Pluck(6,0,-0.5)},1700);
+            }
+
+            function Gmajor(){
+                window.setTimeout(function(){Pluck(1,3,-0.5)},1500);
+                window.setTimeout(function(){Pluck(2,2,-0.5)},1550);
+                window.setTimeout(function(){Pluck(3,0,0.5)},1600);
+                window.setTimeout(function(){Pluck(4,0,0.5)},1650);
+                window.setTimeout(function(){Pluck(5,3,0.5)},1700);
+                window.setTimeout(function(){Pluck(6,3,0.5)},1750);
+            }
+
+            function Pluck(string,fret,dir){
+                console.log("Plucking");
                 var data = {
                     "sessionId": sessionId,
                     "parameters": [
-                        {
-                            "partId": 1,
-                            "name": "position",
-                            "value": -0.5,
-                            "when": 0.1
-                        }
-                    ]
+                    {
+                        "partId": string,
+                        "name": "pitchbend",
+                        "value": 100*fret
+                    }]
                 };
                 modalysChannel.publish("updateParameter", data);
-                console.log("5 seconds");
-            }
-
-            function noteB() {
                 var data = {
+
                     "sessionId": sessionId,
                     "parameters": [
-                        {
-                            "partId": 2,
-                            "name": "position",
-                            "value": -0.5,
-                            "when": 0.1
-                        }
-                    ]
+                    {
+                        "partId": string,
+                        "name": "position",
+                        "value": dir,
+                        "when": 0.05
+                    }]
                 };
                 modalysChannel.publish("updateParameter", data);
-                console.log("15 seconds");
             }
-
-            function noteC() {
-                var data = {
-                    "sessionId": sessionId,
-                    "parameters": [
-                        {
-                            "partId": 3,
-                            "name": "position",
-                            "value": -0.5,
-                            "when": 0.1
-                        }
-                    ]
-                };
-                modalysChannel.publish("updateParameter", data);
-                console.log("25 seconds");
-            }
-
-            function noteD() {
-                var data = {
-                    "sessionId": sessionId,
-                    "parameters": [
-                        {
-                            "partId": 4,
-                            "name": "position",
-                            "value": -0.5,
-                            "when": 0.1
-                        }
-                    ]
-                };
-                modalysChannel.publish("updateParameter", data);
-                console.log("35 seconds");
-            }
-
-            function noteE() {
-                var data = {
-                    "sessionId": sessionId,
-                    "parameters": [
-                        {
-                            "partId": 5,
-                            "name": "position",
-                            "value": -0.5,
-                            "when": 0.1
-                        }
-                    ]
-                };
-                modalysChannel.publish("updateParameter", data);
-                console.log("45 seconds");
-            }
-
-            function noteF() {
-                var data = {
-                    "sessionId": sessionId,
-                    "parameters": [
-                        {
-                            "partId": 6,
-                            "name": "position",
-                            "value": -0.5,
-                            "when": 0.1
-                        }
-                    ]
-                };
-                modalysChannel.publish("updateParameter", data);
-                console.log("55 seconds");
-            }
-
-
         }
         </script>
 

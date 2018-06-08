@@ -201,19 +201,17 @@ class PitchVolumeOrgan {
             var duration = 10;
             console.log(Lnote, Rnote);
 
-            if (Lnote == undefined || Lnote < 0 || Lnote > 7 ) {
-                  for (var i=0;i<this.player.envelopes.length;i++) {
-                    this.player.envelopes[i].cancel();
-                  }              
-            }
+            // if (Lnote == undefined || Lnote < 0 || Lnote > 7 ) {
+            //       for (var i=0;i<this.player.envelopes.length;i++) {
+            //         this.player.envelopes[i].cancel();
+            //       }              
+            // }
 
-            if (Rnote == undefined || Rnote < 0 || Rnote > 7 ) {
-                  for (var i=0;i<this.player2.envelopes.length;i++) {
-                    this.player2.envelopes[i].cancel();
-                  }              
-            }
-
-
+            // if (Rnote == undefined || Rnote < 0 || Rnote > 7 ) {
+            //       for (var i=0;i<this.player2.envelopes.length;i++) {
+            //         this.player2.envelopes[i].cancel();
+            //       }              
+            // }
 
             if (Lnote != undefined && Lnote != this.previousNoteL)  {
                   for (var i=0;i<this.player.envelopes.length;i++) {

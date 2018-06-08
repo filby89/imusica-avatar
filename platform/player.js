@@ -1,13 +1,13 @@
 class Player {
-	constructor(world, ID, modalysChannel, modalysSessionId, dom_parent) {
+	constructor(world, ID, modalysChannel, modalysSessionId, dom_parent, fret) {
 		var mirror = true;
         this.avatar = new kinectAvatar(world, 1, true);
-        this.guitar = new AirGuitar(world, this.avatar, modalysChannel, modalysSessionId, mirror, ID);
+        this.guitar = new AirGuitar(world, this.avatar, modalysChannel, modalysSessionId, mirror, ID, fret);
         this.cello = new AirCello(world, this.avatar, mirror, ID);
         this.avatar.addToScene();
         this.ID = ID;
     	this.pitchVolumeOrgan = new PitchVolumeOrgan(world, this.avatar, mirror, ID);
-
+    	this.fret = fret;
     	this.dom_element = `<div class="col"> <div id=${ID} class='card' style='width: 18rem;'>
   <div class='card-body'>
     <h5 class='card-title text-primary'>Player ${ID}</h5>

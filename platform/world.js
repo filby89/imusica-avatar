@@ -31,13 +31,13 @@ class interactionWorld{
 		this.orbit = new THREE.OrbitControls( this.camera, this.renderer.domElement );
 
 		var light = new THREE.PointLight( 0xc8aa8e, 2, 100 );
-		light.position.set( 0, 2, -4 );
+		light.position.set( 0, 2, -2 );
 		this.scene.add( light )
 
 
 		// floor
 		var geometry = new THREE.PlaneGeometry( 5, 5);
-		var material = new THREE.MeshLambertMaterial( {color: 0x608038, side: THREE.DoubleSide} );
+		var material = new THREE.MeshLambertMaterial( {color: 0x726c6c, side: THREE.DoubleSide} );
 		var floor = new THREE.Mesh( geometry, material );
 		floor.material.side = THREE.DoubleSide;
 
@@ -49,7 +49,7 @@ class interactionWorld{
 
 		//wall 1
 		var geometry = new THREE.PlaneGeometry( 5, 3);
-		var material = new THREE.MeshLambertMaterial( {color: 0xc8aa8e, side: THREE.DoubleSide} );
+		var material = new THREE.MeshLambertMaterial( {color: 0xf3f3e2, side: THREE.DoubleSide} );
 
 		var wall1 = new THREE.Mesh( geometry, material );
 		var wall2 = new THREE.Mesh( geometry, material );

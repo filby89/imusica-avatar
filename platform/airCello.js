@@ -220,7 +220,8 @@ class AirCello {
 
       var audio = null;
 
-      var notes = [48,50,52,53,55,57,59,60];
+      // var notes = [48,50,52,53,55,57,59,60];
+      var notes = [60,59,57,55,53,52,50,48];//48,50,52,53,55,57,59,60];
 
       var note_to_play = notes[bendQuanto-1];
 

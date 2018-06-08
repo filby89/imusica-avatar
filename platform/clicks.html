@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Click Buttons</title>
+</head>
+
+<body>
+	<div id='d1' style="position:absolute; top:200px; left:200px">
+		<canvas id = "mycanvas" width = "150" height = "50" style="border:2px solid #00FF00;"> </canvas>
+	</div>
+	<div id = 'd2' style="position:absolute; top:500px; left: 500px"> 
+ 		<button type="button" id = "36857" style="position:relative; top:-100px; left:100px; width:100px; height: 30px; background-color: Transparent; background-repeat:no-repeat; border: none; overflow: hidden; outline:none;" value = "none"><button> 
+	</div>
+</body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+ <script>
+
+window.onload = function(){
+	var RClick = 0
+	var LClick = 0;
+	var tuturu = $("#36857");
+	tuturu.click(function(e)
+	{
+		console.log("AAA");
+		Cx = e.pageX;
+		Cy = e.pageY;
+		if (Cx < 790)
+			RClick++;
+		else
+			LClick++;
+		console.log(RClick);
+		console.log(LClick);
+	})
+};
+
+ </script>
